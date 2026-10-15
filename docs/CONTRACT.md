@@ -130,7 +130,7 @@ public TmdWeatherProvider(String apiToken);
 
 ตัวอย่างจริง กรุงเทพฯ 2026-10-15: 22 ชั่วโมง มีฝน 2 ชั่วโมง (3.4 + 13.3 มม.) → `rainMm = 16.7`, `rainChancePercent = 9`
 
-**การแปลงชื่อสถานที่เป็นพิกัด:** `TmdWeatherProvider` มีตารางชื่อเมือง → lat/lon ในตัว (ไม่สนตัวพิมพ์/ช่องว่าง เช่น `Bangkok`, `Chiang Mai`, `chiangmai`)
+**การแปลงชื่อสถานที่เป็นพิกัด:** `TmdWeatherProvider` ใช้ `ThaiLocations` (ตารางชื่อจังหวัดภาษาอังกฤษครบ 77 จังหวัด → lat/lon ตามพิกัดอ้างอิงของ TMD) (ไม่สนตัวพิมพ์/ช่องว่าง เช่น `Bangkok`, `Chiang Mai`, `chiangmai`)
 และรับรูปแบบ `"<lat>,<lon>"` ได้โดยตรง เช่น `13.75,100.50` ชื่อที่ไม่อยู่ในตารางจะได้ `Location not found`
 
 ผลลัพธ์ต่อ B ยังเป็น `WeatherData` เหมือนเดิม — **signature ไม่เปลี่ยน**
