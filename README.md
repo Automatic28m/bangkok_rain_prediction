@@ -75,7 +75,11 @@ cd bangkok_rain_prediction
 mvn clean package
 ```
 
-ตั้งค่า API token เป็น environment variable (ห้ามใส่ token ในโค้ดหรือ commit):
+### ตั้งค่า API token
+
+โปรแกรมอ่าน token จาก environment variable `TMD_API_TOKEN` เท่านั้น (ไม่อ่านไฟล์ `.env`) — **ห้ามใส่ token ในโค้ดหรือ commit**
+
+**แบบที่ 1 — ใช้เฉพาะ terminal ที่เปิดอยู่** (หายเมื่อปิด terminal)
 
 ```bash
 # macOS / Linux / Git Bash
@@ -86,6 +90,37 @@ export TMD_API_TOKEN="<your-token>"
 # Windows PowerShell
 $env:TMD_API_TOKEN = "<your-token>"
 ```
+
+**แบบที่ 2 — บันทึกถาวร** (ตั้งครั้งเดียว ใช้ได้ทุก terminal ที่เปิดใหม่)
+
+```powershell
+# Windows (Command Prompt หรือ PowerShell) — ต้องปิดแล้วเปิด terminal / IDE ใหม่หลังรัน
+setx TMD_API_TOKEN "<your-token>"
+```
+
+```bash
+# macOS / Linux — เพิ่มลงไฟล์ shell profile แล้วเปิด terminal ใหม่
+echo 'export TMD_API_TOKEN="<your-token>"' >> ~/.bashrc   # หรือ ~/.zshrc
+```
+
+**แบบที่ 3 — ตั้งใน IDE** (รันจากปุ่ม Run ของ IDE)
+
+- **IntelliJ IDEA:** Run → Edit Configurations… → เลือก configuration ของ `Main` → ช่อง **Environment variables** ใส่ `TMD_API_TOKEN=<your-token>`
+- **VS Code:** ใน `.vscode/launch.json` เพิ่ม `"env": { "TMD_API_TOKEN": "<your-token>" }` (โฟลเดอร์ `.vscode/` อยู่ใน `.gitignore` แล้ว)
+
+ตรวจว่าตั้งค่าแล้ว (แสดงแค่จำนวนตัวอักษร ไม่แสดง token):
+
+```powershell
+# Windows PowerShell
+$env:TMD_API_TOKEN.Length
+```
+
+```bash
+# macOS / Linux / Git Bash
+echo ${#TMD_API_TOKEN}
+```
+
+ถ้ายังไม่มี token ใช้ `--mock` แทนได้
 
 ### การใช้งาน
 
