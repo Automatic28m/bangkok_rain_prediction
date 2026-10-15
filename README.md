@@ -79,6 +79,8 @@ mvn clean package
 
 โปรแกรมอ่าน token จาก environment variable `TMD_API_TOKEN` เท่านั้น (ไม่อ่านไฟล์ `.env`) — **ห้ามใส่ token ในโค้ดหรือ commit**
 
+> token ของ TMD ขึ้นต้นด้วย `eyJ` และยาวกว่า 1,000 ตัวอักษร — คัดลอก**เฉพาะตัว token** อย่าให้มีข้อความอื่นติดมา เช่น ชื่อ "Thai Meteorological Department (TMD)" ที่หน้าเว็บแสดงไว้ด้านหน้า
+
 **แบบที่ 1 — ใช้เฉพาะ terminal ที่เปิดอยู่** (หายเมื่อปิด terminal)
 
 ```bash
@@ -94,9 +96,11 @@ $env:TMD_API_TOKEN = "<your-token>"
 **แบบที่ 2 — บันทึกถาวร** (ตั้งครั้งเดียว ใช้ได้ทุก terminal ที่เปิดใหม่)
 
 ```powershell
-# Windows (Command Prompt หรือ PowerShell) — ต้องปิดแล้วเปิด terminal / IDE ใหม่หลังรัน
-setx TMD_API_TOKEN "<your-token>"
+# Windows PowerShell (ไม่ใช่ Command Prompt) — ต้องปิดแล้วเปิด terminal / IDE ใหม่หลังรัน
+[Environment]::SetEnvironmentVariable('TMD_API_TOKEN', '<your-token>', 'User')
 ```
+
+> **ห้ามใช้ `setx`** — `setx` เก็บค่าได้ไม่เกิน 1,024 ตัวอักษร token ของ TMD ยาวกว่านั้นจึงถูกตัดท้ายทิ้ง แล้ว API จะตอบ `Invalid or missing API token`
 
 ```bash
 # macOS / Linux — เพิ่มลงไฟล์ shell profile แล้วเปิด terminal ใหม่
@@ -108,17 +112,25 @@ echo 'export TMD_API_TOKEN="<your-token>"' >> ~/.bashrc   # หรือ ~/.zshr
 - **IntelliJ IDEA:** Run → Edit Configurations… → เลือก configuration ของ `Main` → ช่อง **Environment variables** ใส่ `TMD_API_TOKEN=<your-token>`
 - **VS Code:** ใน `.vscode/launch.json` เพิ่ม `"env": { "TMD_API_TOKEN": "<your-token>" }` (โฟลเดอร์ `.vscode/` อยู่ใน `.gitignore` แล้ว)
 
-ตรวจว่าตั้งค่าแล้ว (แสดงแค่จำนวนตัวอักษร ไม่แสดง token):
+ตรวจว่าตั้งค่าแล้ว (แสดงแค่จำนวนตัวอักษรและ 3 ตัวแรก ไม่แสดง token ทั้งหมด):
 
 ```powershell
-# Windows PowerShell
+# Windows PowerShell — ควรได้ตัวเลขมากกว่า 1000 และ eyJ
 $env:TMD_API_TOKEN.Length
+$env:TMD_API_TOKEN.Substring(0, 3)
 ```
 
 ```bash
-# macOS / Linux / Git Bash
+# macOS / Linux / Git Bash — ควรได้ตัวเลขมากกว่า 1000 และ eyJ
 echo ${#TMD_API_TOKEN}
+echo "${TMD_API_TOKEN:0:3}"
 ```
+
+| อาการ | สาเหตุ |
+|-------|--------|
+| ความยาวเป็น `0` / ขึ้น error ว่า null | ยังไม่ได้ตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังตั้งแบบที่ 2 |
+| ความยาวเป็น `1024` พอดี | ใช้ `setx` → token ถูกตัด ให้ตั้งใหม่ด้วยคำสั่งในแบบที่ 2 |
+| 3 ตัวแรกไม่ใช่ `eyJ` | มีข้อความอื่นติดมาด้านหน้า token |
 
 ถ้ายังไม่มี token ใช้ `--mock` แทนได้
 
