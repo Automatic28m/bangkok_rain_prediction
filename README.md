@@ -162,6 +162,7 @@ cd bangkok_rain_prediction
 | `java` / `mvn` is not recognized | ยังไม่ได้ติดตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังแก้ PATH (ถ้าใช้ terminal ใน VS Code / IntelliJ ให้ปิดโปรแกรมแล้วเปิดใหม่) |
 | `TMD_API_TOKEN is not set` | ยังไม่ได้ตั้ง token หรือยังไม่ได้เปิด terminal ใหม่ — หรือใช้ `--mock` |
 | `Invalid or missing API token` | token ผิด / ถูกตัด — ตรวจตาม[ตั้งค่า API token](#ตั้งค่า-api-token) (ความยาวต้องมากกว่า 1000 และขึ้นต้นด้วย `eyJ`) |
+| `Too many requests to weather service` | TMD จำกัดประมาณ 60 ครั้งต่อนาที — รอประมาณ 1 นาทีแล้วรันใหม่ |
 | `The filename, directory name, or volume label syntax is incorrect` | รันคำสั่ง `[Environment]::...` ใน Command Prompt — ให้พิมพ์ `powershell` ก่อนแล้วรันใหม่ |
 | `.\run` is not recognized | ไม่ได้อยู่ในโฟลเดอร์โปรเจกต์ — `cd` ไปที่โฟลเดอร์ที่ clone มา |
 | `Location not found` | ชื่อสะกดไม่ตรงกับ[สถานที่ที่รองรับ](#สถานที่ที่รองรับ) — ตรวจการสะกด หรือใช้พิกัดแทน เช่น `.\run 13.75,100.50` |

@@ -140,6 +140,7 @@
 | token ผิด / ไม่ส่ง | 401 | `{"error":"Unauthenticated."}` |
 | พิกัดนอกประเทศไทย | 422 | `{"lat":["The lat must be between 5.61 and 20.47."],"lon":["The lon must be between 97.34 and 105.64."]}` |
 | `place` หาไม่พบ | 404 | `{"WeatherForecasts":[]}` |
+| เรียกเกินประมาณ 60 ครั้งต่อนาที (ต่อ token) | 429 | — (ใช้ได้ตามปกติอีกครั้งหลังรอประมาณ 1 นาที) |
 
 ---
 
@@ -165,6 +166,7 @@ data.getRainChancePercent();  // % ของชั่วโมงที่มี
 |---------|--------|
 | `Location not found: <location>` | ชื่อไม่อยู่ในตาราง หรือพิกัดนอกไทย (422) |
 | `Invalid or missing API token` | 401 / 403 |
+| `Too many requests to weather service, please wait a minute and try again` | 429 — เรียกเกินประมาณ 60 ครั้ง/นาที |
 | `Cannot reach weather service (timeout)` | เกิน 10 วินาที |
 | `Cannot reach weather service` | เครือข่ายมีปัญหา |
 | `Weather service returned HTTP <code>` | HTTP อื่นที่ไม่ใช่ 200 |
