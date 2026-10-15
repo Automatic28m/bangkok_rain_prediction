@@ -48,6 +48,7 @@
 |-------|---------|
 | `WeatherProvider` | interface สำหรับแหล่งข้อมูลสภาพอากาศ |
 | `TmdWeatherProvider` | เรียก TMD API แล้วแปลง JSON เป็น `WeatherData` |
+| `ThaiLocations` | ตารางพิกัด 77 จังหวัด แปลงชื่อสถานที่เป็น lat/lon |
 | `MockWeatherProvider` | ข้อมูลจำลองสำหรับเดโม / ทดสอบ |
 | `WeatherData` | ข้อมูลสภาพอากาศ: สถานที่, ปริมาณฝน, โอกาสฝนตก |
 | `WeatherException` | ข้อผิดพลาดจากการดึงข้อมูล |
@@ -163,7 +164,7 @@ cd bangkok_rain_prediction
 | `Invalid or missing API token` | token ผิด / ถูกตัด — ตรวจตาม[ตั้งค่า API token](#ตั้งค่า-api-token) (ความยาวต้องมากกว่า 1000 และขึ้นต้นด้วย `eyJ`) |
 | `The filename, directory name, or volume label syntax is incorrect` | รันคำสั่ง `[Environment]::...` ใน Command Prompt — ให้พิมพ์ `powershell` ก่อนแล้วรันใหม่ |
 | `.\run` is not recognized | ไม่ได้อยู่ในโฟลเดอร์โปรเจกต์ — `cd` ไปที่โฟลเดอร์ที่ clone มา |
-| `Location not found` | ชื่อเมืองไม่อยู่ในรายการ — ใช้พิกัดแทน เช่น `.\run 13.75,100.50` |
+| `Location not found` | ชื่อสะกดไม่ตรงกับ[สถานที่ที่รองรับ](#สถานที่ที่รองรับ) — ตรวจการสะกด หรือใช้พิกัดแทน เช่น `.\run 13.75,100.50` |
 | `Error: build failed` | โค้ดมี compile error — แก้ตามข้อความ `[ERROR]` ที่แสดง |
 
 ---
@@ -282,6 +283,26 @@ java -jar target/app.jar Phuket --mock
 ```
 
 ข้อมูลจำลองใน `--mock` ครอบคลุมทั้ง 3 ระดับ: `Chiangmai` (SAFE), `Bangkok` (WARNING), `Phuket` (DANGER)
+
+### สถานที่ที่รองรับ
+
+ใช้กับข้อมูลจริง (ไม่ใช่ `--mock`) ระบุได้ 2 แบบ:
+
+**1. ชื่อจังหวัดภาษาอังกฤษ — ครบ 77 จังหวัด** ไม่สนตัวพิมพ์ เว้นวรรค `-` หรือ `_` (เช่น `"Chiang Mai"`, `chiang-mai`, `CHIANGMAI` ได้ผลเหมือนกัน) ชื่อที่มีเว้นวรรคต้องใส่ `"..."`
+
+| ภาค | จังหวัด |
+|-----|---------|
+| กลาง | Bangkok, Kamphaeng Phet, Chai Nat, Nakhon Nayok, Nakhon Pathom, Nakhon Sawan, Nonthaburi, Pathum Thani, Phra Nakhon Si Ayutthaya, Phichit, Phitsanulok, Lop Buri, Samut Prakan, Samut Songkhram, Samut Sakhon, Saraburi, Sing Buri, Suphan Buri, Sukhothai, Uthai Thani, Ang Thong, Phetchabun |
+| เหนือ | Nan, Phayao, Lampang, Lamphun, Uttaradit, Chiang Rai, Chiang Mai, Phrae, Mae Hong Son |
+| ตะวันออกเฉียงเหนือ | Kalasin, Khon Kaen, Chaiyaphum, Nakhon Phanom, Nakhon Ratchasima, Bueng Kan, Buri Ram, Maha Sarakham, Mukdahan, Yasothon, Roi Et, Si Sa Ket, Sakon Nakhon, Surin, Nong Khai, Nong Bua Lam Phu, Amnat Charoen, Udon Thani, Ubon Ratchathani, Loei |
+| ตะวันออก | Chanthaburi, Chachoengsao, Chon Buri, Trat, Prachin Buri, Rayong, Sa Kaeo |
+| ใต้ | Krabi, Chumphon, Trang, Nakhon Si Thammarat, Narathiwat, Pattani, Phang Nga, Phatthalung, Phuket, Yala, Ranong, Songkhla, Satun, Surat Thani |
+| ตะวันตก | Kanchanaburi, Tak, Prachuap Khiri Khan, Ratchaburi, Phetchaburi |
+
+ชื่อเพิ่มเติม: `Ayutthaya`, `Korat` (นครราชสีมา) และเมืองที่ไม่ใช่จังหวัด `Pattaya`, `Hat Yai` — การสะกดติดกันก็ใช้ได้ เช่น `Sisaket`, `Chonburi`, `Lopburi`
+การจัดภาคและพิกัดของแต่ละจังหวัดใช้ตาม TMD (`forecast/location/daily/region`)
+
+**2. พิกัด `lat,lon`** — ใช้ได้ทุกจุดในประเทศไทย (lat 5.61–20.47, lon 97.34–105.64) เช่น `.\run 13.75,100.50`
 
 | Exit code | ความหมาย |
 |-----------|----------|

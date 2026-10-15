@@ -13,8 +13,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -33,26 +31,6 @@ public class TmdWeatherProvider implements WeatherProvider {
     private static final int FORECAST_HOURS = 24;
     private static final double RAINY_HOUR_MIN_MM = 0.1;
     private static final Duration TIMEOUT = Duration.ofSeconds(10);
-
-    /** Known locations; keys are normalized names (lowercase, no spaces, '-' or '_'). */
-    private static final Map<String, double[]> COORDINATES = Map.ofEntries(
-            Map.entry("bangkok", new double[] {13.7563, 100.5018}),
-            Map.entry("nonthaburi", new double[] {13.8621, 100.5144}),
-            Map.entry("pathumthani", new double[] {14.0208, 100.5250}),
-            Map.entry("samutprakan", new double[] {13.5991, 100.5998}),
-            Map.entry("ayutthaya", new double[] {14.3532, 100.5689}),
-            Map.entry("chiangmai", new double[] {18.7883, 98.9853}),
-            Map.entry("chiangrai", new double[] {19.9105, 99.8406}),
-            Map.entry("khonkaen", new double[] {16.4322, 102.8236}),
-            Map.entry("nakhonratchasima", new double[] {14.9799, 102.0978}),
-            Map.entry("udonthani", new double[] {17.4138, 102.7870}),
-            Map.entry("ubonratchathani", new double[] {15.2448, 104.8473}),
-            Map.entry("chonburi", new double[] {13.3611, 100.9847}),
-            Map.entry("pattaya", new double[] {12.9236, 100.8825}),
-            Map.entry("phuket", new double[] {7.8804, 98.3923}),
-            Map.entry("suratthani", new double[] {9.1382, 99.3215}),
-            Map.entry("hatyai", new double[] {7.0086, 100.4747}),
-            Map.entry("songkhla", new double[] {7.1898, 100.5954}));
 
     private final String apiToken;
     private final HttpClient client;
@@ -144,12 +122,12 @@ public class TmdWeatherProvider implements WeatherProvider {
         return new WeatherData(location.trim(), rainMm, rainChancePercent);
     }
 
-    /** Accepts a known location name or "lat,lon". */
+    /** Accepts a name known to {@link ThaiLocations} or "lat,lon". */
     private static double[] resolve(String location) throws WeatherException {
         if (location == null || location.isBlank()) {
             throw new WeatherException("Location not found: " + location);
         }
-        double[] known = COORDINATES.get(normalize(location));
+        double[] known = ThaiLocations.find(location);
         if (known != null) {
             return known;
         }
@@ -163,9 +141,5 @@ public class TmdWeatherProvider implements WeatherProvider {
             }
         }
         throw new WeatherException("Location not found: " + location);
-    }
-
-    private static String normalize(String location) {
-        return location.toLowerCase(Locale.ROOT).replaceAll("[\\s_-]", "");
     }
 }
