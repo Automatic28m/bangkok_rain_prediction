@@ -67,6 +67,107 @@
 
 ---
 
+## เริ่มต้นใช้งานครั้งแรก (Quick Start)
+
+ทำตามลำดับนี้บนเครื่องใหม่ — คำสั่งฝั่ง Windows ใช้ **PowerShell** (ไม่ใช่ Command Prompt)
+
+### ขั้นที่ 1 — ติดตั้ง Java 17 ขึ้นไป
+
+ตรวจก่อนว่ามีอยู่แล้วหรือยัง:
+
+```bash
+java -version
+```
+
+ถ้าขึ้น `not recognized` / `command not found` หรือเวอร์ชันต่ำกว่า 17 ให้ติดตั้ง:
+
+| OS | วิธีติดตั้ง |
+|----|-------------|
+| Windows | `winget install EclipseAdoptium.Temurin.21.JDK` หรือดาวน์โหลดตัวติดตั้งจาก https://adoptium.net |
+| macOS | `brew install openjdk@21` |
+| Ubuntu / Debian | `sudo apt install openjdk-21-jdk` |
+
+### ขั้นที่ 2 — ติดตั้ง Maven 3.8 ขึ้นไป
+
+ตรวจก่อน:
+
+```bash
+mvn -v
+```
+
+ถ้ายังไม่มี:
+
+| OS | วิธีติดตั้ง |
+|----|-------------|
+| macOS | `brew install maven` |
+| Ubuntu / Debian | `sudo apt install maven` |
+| Windows | ทำตามขั้นด้านล่าง |
+
+**Windows:**
+
+1. ดาวน์โหลด **Binary zip archive** (`apache-maven-3.x.x-bin.zip`) จาก https://maven.apache.org/download.cgi
+2. แตกไฟล์ไว้ในโฟลเดอร์ที่ไม่มีเว้นวรรค เช่น `C:\tools\apache-maven-3.9.9`
+3. เพิ่มโฟลเดอร์ `bin` เข้า PATH ของ user (แก้ path ให้ตรงกับที่แตกไฟล์):
+
+   ```powershell
+   [Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';C:\tools\apache-maven-3.9.9\bin', 'User')
+   ```
+
+4. **ปิดแล้วเปิด PowerShell ใหม่** แล้วรัน `mvn -v` อีกครั้ง
+
+### ขั้นที่ 3 — ดาวน์โหลดโปรเจกต์
+
+```bash
+git clone https://github.com/Automatic28m/bangkok_rain_prediction.git
+cd bangkok_rain_prediction
+```
+
+### ขั้นที่ 4 — ขอและตั้งค่า TMD API token
+
+1. สมัครสมาชิก / เข้าสู่ระบบที่ https://data.tmd.go.th/nwpapi/
+2. คัดลอก API token ของบัญชี — **เฉพาะตัว token ที่ขึ้นต้นด้วย `eyJ`**
+3. บันทึก token แบบถาวร ตาม[ตั้งค่า API token](#ตั้งค่า-api-token) แบบที่ 2 (Windows ใช้คำสั่งด้านล่าง **ห้ามใช้ `setx`**):
+
+   ```powershell
+   [Environment]::SetEnvironmentVariable('TMD_API_TOKEN', '<your-token>', 'User')
+   ```
+
+4. **ปิดแล้วเปิด terminal ใหม่**
+
+ข้ามขั้นนี้ได้ถ้าจะใช้แค่ `--mock`
+
+### ขั้นที่ 5 — ลองรัน
+
+ในโฟลเดอร์โปรเจกต์:
+
+```powershell
+# Windows
+.\run Bangkok --mock      # ข้อมูลจำลอง — ใช้ได้แม้ยังไม่มี token
+.\run Bangkok             # ข้อมูลจริงจาก TMD
+```
+
+```bash
+# macOS / Linux / Git Bash
+./run.sh Bangkok --mock
+./run.sh Bangkok
+```
+
+ครั้งแรกจะช้ากว่าปกติ (Maven ดาวน์โหลด dependency) ถ้าเห็นผลขึ้นต้นด้วย `[SAFE]`, `[WARNING]` หรือ `[DANGER]` แสดงว่าพร้อมใช้งาน
+
+### ปัญหาที่เจอบ่อย
+
+| อาการ | วิธีแก้ |
+|-------|---------|
+| `java` / `mvn` is not recognized | ยังไม่ได้ติดตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังแก้ PATH (ถ้าใช้ terminal ใน VS Code / IntelliJ ให้ปิดโปรแกรมแล้วเปิดใหม่) |
+| `TMD_API_TOKEN is not set` | ยังไม่ได้ตั้ง token หรือยังไม่ได้เปิด terminal ใหม่ — หรือใช้ `--mock` |
+| `Invalid or missing API token` | token ผิด / ถูกตัด — ตรวจตาม[ตั้งค่า API token](#ตั้งค่า-api-token) (ความยาวต้องมากกว่า 1000 และขึ้นต้นด้วย `eyJ`) |
+| `The filename, directory name, or volume label syntax is incorrect` | รันคำสั่ง `[Environment]::...` ใน Command Prompt — ให้พิมพ์ `powershell` ก่อนแล้วรันใหม่ |
+| `.\run` is not recognized | ไม่ได้อยู่ในโฟลเดอร์โปรเจกต์ — `cd` ไปที่โฟลเดอร์ที่ clone มา |
+| `Location not found` | ชื่อเมืองไม่อยู่ในรายการ — ใช้พิกัดแทน เช่น `.\run 13.75,100.50` |
+| `Error: build failed` | โค้ดมี compile error — แก้ตามข้อความ `[ERROR]` ที่แสดง |
+
+---
+
 ## การติดตั้งและรัน
 
 ```bash
