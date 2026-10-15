@@ -122,7 +122,26 @@ echo ${#TMD_API_TOKEN}
 
 ถ้ายังไม่มี token ใช้ `--mock` แทนได้
 
-### การใช้งาน
+### รันด้วยคำสั่งเดียว (แนะนำ)
+
+สคริปต์ `run` จะ build โปรเจกต์ (ข้ามเทสต์) แล้วรันโปรแกรมให้ทันที — ไม่ต้องรัน `mvn package` เอง และได้โค้ดล่าสุดทุกครั้ง
+
+```powershell
+# Windows (PowerShell หรือ Command Prompt)
+.\run Bangkok
+.\run "Chiang Mai"
+.\run Phuket --mock
+```
+
+```bash
+# macOS / Linux / Git Bash
+./run.sh Bangkok
+./run.sh Phuket --mock
+```
+
+ข้อความระหว่าง build จะแสดงเฉพาะตอน build ไม่ผ่าน และสคริปต์คืน exit code เดียวกับโปรแกรม (ดูตารางด้านล่าง)
+
+### การใช้งานแบบรัน jar โดยตรง
 
 ```
 java -jar target/app.jar <location> [--mock]
@@ -177,6 +196,8 @@ bangkok_rain_prediction/
 │   ├── main/java/floodalert/
 │   └── test/java/floodalert/
 ├── pom.xml
+├── run.cmd              build + รันในคำสั่งเดียว (Windows)
+├── run.sh               build + รันในคำสั่งเดียว (macOS / Linux)
 └── README.md
 ```
 
