@@ -104,6 +104,7 @@ public TmdWeatherProvider(String apiToken);
 |------|---------|
 | timeout / เครือข่ายล่ม | `Cannot reach weather service (timeout)` |
 | token ผิด / หมดอายุ (401/403) | `Invalid or missing API token` |
+| เรียกถี่เกินไป (429 — TMD จำกัดประมาณ 60 ครั้ง/นาที) | `Too many requests to weather service, please wait a minute and try again` |
 | ไม่พบสถานที่ (ไม่อยู่ในตาราง หรือพิกัดนอกประเทศไทย → HTTP 422) | `Location not found: <location>` |
 | response ผิดรูป / ขาด field | `Unexpected response from weather service` |
 

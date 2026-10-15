@@ -79,6 +79,11 @@ public class TmdWeatherProvider implements WeatherProvider {
         if (status == 422) {
             throw new WeatherException("Location not found: " + location);
         }
+        if (status == 429) {
+            // TMD allows roughly 60 requests per minute per token
+            throw new WeatherException(
+                    "Too many requests to weather service, please wait a minute and try again");
+        }
         if (status != 200) {
             throw new WeatherException("Weather service returned HTTP " + status);
         }
