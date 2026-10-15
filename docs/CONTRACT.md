@@ -104,11 +104,36 @@ public TmdWeatherProvider(String apiToken);
 |------|---------|
 | timeout / เครือข่ายล่ม | `Cannot reach weather service (timeout)` |
 | token ผิด / หมดอายุ (401/403) | `Invalid or missing API token` |
-| ไม่พบสถานที่ | `Location not found: <location>` |
+| ไม่พบสถานที่ (ไม่อยู่ในตาราง หรือพิกัดนอกประเทศไทย → HTTP 422) | `Location not found: <location>` |
 | response ผิดรูป / ขาด field | `Unexpected response from weather service` |
 
-> **คน A ต้องตัดสินใจและแจ้งคน B:** endpoint ของ TMD ที่ใช้ (ค้นด้วยชื่อสถานที่ หรือด้วย lat/lon) และ field ไหนของ TMD แทน "โอกาสฝนตก %"
-> ถ้า TMD ไม่ให้ค่านี้ตรงๆ ให้แจ้งทันทีเพื่อปรับเกณฑ์ในหัวข้อ 3.3 — ผลลัพธ์ต่อ B ต้องยังเป็น `WeatherData` เหมือนเดิม
+#### TMD API ที่ใช้ (ทดสอบกับ API จริงแล้ว 2026-10-15)
+
+| รายการ | ค่า |
+|--------|-----|
+| Endpoint | `GET https://data.tmd.go.th/nwpapi/v1/forecast/location/hourly/at` |
+| Auth | Header `authorization: Bearer <TMD_API_TOKEN>` |
+| Query | `lat`, `lon`, `fields=rain`, `date=<วันนี้>`, `hour=<ชั่วโมงปัจจุบัน>`, `duration=24` (เวลาไทย) |
+
+**ผลการทดสอบที่ทำให้เลือกแบบนี้**
+
+- endpoint แบบชื่อสถานที่ (`/place?province=...`) ตอบ **404 ทุกครั้ง** ทั้งชื่อไทยและอังกฤษ → ใช้ **lat/lon (`/at`)** แทน
+- TMD **ไม่มี field "โอกาสฝนตก %"** (ทั้งในเอกสารและ response จริง) มีแค่ `rain` (มม.) และ `cond` (รหัสสภาพอากาศ)
+- ช่วงพิกัดที่รับ: lat 5.61–20.47, lon 97.34–105.64 (นอกช่วงตอบ 422)
+
+**วิธีคำนวณค่าใน `WeatherData`** (จากข้อมูลรายชั่วโมงล่วงหน้า 24 ชั่วโมง)
+
+| field | วิธีคำนวณ |
+|-------|-----------|
+| `rainMm` | ผลรวม `rain` ของทุกชั่วโมง (ปัดเป็นทศนิยม 1 ตำแหน่ง) |
+| `rainChancePercent` | **สัดส่วนชั่วโมงที่มีฝน** = จำนวนชั่วโมงที่ `rain >= 0.1` มม. × 100 ÷ จำนวนชั่วโมงทั้งหมด (ปัดเป็นจำนวนเต็ม) |
+
+ตัวอย่างจริง กรุงเทพฯ 2026-10-15: 22 ชั่วโมง มีฝน 2 ชั่วโมง (3.4 + 13.3 มม.) → `rainMm = 16.7`, `rainChancePercent = 9`
+
+**การแปลงชื่อสถานที่เป็นพิกัด:** `TmdWeatherProvider` มีตารางชื่อเมือง → lat/lon ในตัว (ไม่สนตัวพิมพ์/ช่องว่าง เช่น `Bangkok`, `Chiang Mai`, `chiangmai`)
+และรับรูปแบบ `"<lat>,<lon>"` ได้โดยตรง เช่น `13.75,100.50` ชื่อที่ไม่อยู่ในตารางจะได้ `Location not found`
+
+ผลลัพธ์ต่อ B ยังเป็น `WeatherData` เหมือนเดิม — **signature ไม่เปลี่ยน**
 
 ### 3.3 คน B — Logic + CLI
 
@@ -148,6 +173,10 @@ public class AlertPrinter {
 | 3 | นอกเหนือจากนั้น | `SAFE` |
 
 ค่า threshold ให้เป็นค่าคงที่ (`static final`) ใน `RiskAnalyzer` เพื่อแก้จุดเดียวได้
+
+> **B ช่วยพิจารณา:** `rainChancePercent` จาก TMD คือ "สัดส่วนชั่วโมงที่มีฝนใน 24 ชั่วโมง" (ดูหัวข้อ 3.2) ไม่ใช่ความน่าจะเป็นแบบพยากรณ์ทั่วไป
+> ฝนในไทยมักตกเป็นช่วงสั้นๆ ค่านี้จึงมักต่ำ (เช่น ฝนหนัก 2–3 ชั่วโมง = 8–13%) เงื่อนไข `rainChance >= 70` / `>= 80` อาจแทบไม่เกิดกับข้อมูลจริง
+> ถ้าจะปรับเกณฑ์ ให้แก้ตารางนี้ใน PR เดียวกับ `RiskAnalyzer`
 
 **รูปแบบ output** (ป้ายระดับอยู่ต้นบรรทัดแรกเสมอ)
 
@@ -221,5 +250,6 @@ java -jar app.jar <location> [--mock]
 |--------|-----------|-------|
 | Signature ในหัวข้อ 3 ตกลงกันแล้ว | A + B | ☐ |
 | เกณฑ์ SAFE / WARNING / DANGER (หัวข้อ 3.3) ตกลงกันแล้ว | A + B | ☐ |
-| ได้ TMD API token แล้ว | A | ☐ |
-| เลือก endpoint ของ TMD และรู้ว่า field "โอกาสฝน %" มาจากไหน | A | ☐ |
+| ได้ TMD API token แล้ว | A | ✅ |
+| เลือก endpoint ของ TMD และรู้ว่า field "โอกาสฝน %" มาจากไหน | A | ✅ (หัวข้อ 3.2) |
+| รับทราบวิธีคำนวณ `rainChancePercent` (หัวข้อ 3.2) | B | ☐ |
