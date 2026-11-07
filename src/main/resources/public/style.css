@@ -1,0 +1,88 @@
+:root {
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #1d2433;
+    --muted: #5b6475;
+    --border: #d7dce5;
+    --accent: #2563eb;
+    --safe: #15803d;
+    --warning: #b45309;
+    --danger: #b91c1c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif;
+    line-height: 1.5;
+}
+
+.container { max-width: 640px; margin: 0 auto; padding: 32px 16px; }
+
+h1 { margin: 0; font-size: 1.8rem; }
+.subtitle { margin: 4px 0 24px; color: var(--muted); }
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+label { display: block; font-weight: 600; margin-bottom: 8px; }
+.row { display: flex; gap: 8px; }
+
+input[type="text"], input:not([type]) {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+button {
+    padding: 10px 18px;
+    font-size: 1rem;
+    color: #fff;
+    background: var(--accent);
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+button:disabled { opacity: 0.6; cursor: wait; }
+
+.checkbox { font-weight: normal; margin: 12px 0 0; color: var(--muted); }
+
+.result { border-left: 6px solid var(--muted); }
+.result.SAFE { border-left-color: var(--safe); }
+.result.WARNING { border-left-color: var(--warning); }
+.result.DANGER { border-left-color: var(--danger); }
+.result h2 { margin: 0 0 12px; display: flex; align-items: center; gap: 12px; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 12px; }
+.stats div { background: var(--bg); border-radius: 8px; padding: 10px 12px; }
+.stats dt { color: var(--muted); font-size: 0.85rem; }
+.stats dd { margin: 0; font-size: 1.4rem; font-weight: 700; }
+.reason { margin: 0; color: var(--muted); }
+
+.error { border-left: 6px solid var(--danger); color: var(--danger); }
+
+.badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.badge.SAFE { background: var(--safe); }
+.badge.WARNING { background: var(--warning); }
+.badge.DANGER { background: var(--danger); }
+
+.legend { color: var(--muted); font-size: 0.9rem; line-height: 2; }

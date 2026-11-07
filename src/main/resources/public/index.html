@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flood Risk Alerter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="container">
+    <header>
+        <h1>Flood Risk Alerter</h1>
+        <p class="subtitle">ระบบแจ้งเตือนความเสี่ยงน้ำท่วมจากพยากรณ์ฝนของกรมอุตุนิยมวิทยา</p>
+    </header>
+
+    <form id="risk-form" class="card" autocomplete="off">
+        <label for="location">จังหวัด หรือพิกัด <code>lat,lon</code></label>
+        <div class="row">
+            <input id="location" name="location" list="provinces"
+                   placeholder="เช่น Bangkok, Chiang Mai, 13.75,100.50" required>
+            <button type="submit" id="submit">ตรวจสอบ</button>
+        </div>
+        <datalist id="provinces"></datalist>
+        <label class="checkbox">
+            <input type="checkbox" id="mock"> ใช้ข้อมูลจำลอง (Bangkok, Chiangmai, Phuket)
+        </label>
+    </form>
+
+    <section id="result" aria-live="polite"></section>
+
+    <footer class="legend">
+        <span class="badge SAFE">SAFE</span>
+        <span class="badge WARNING">WARNING</span> ฝน ≥ 35 มม. หรือ ≥ 20 มม. และโอกาส ≥ 70%
+        <br>
+        <span class="badge DANGER">DANGER</span> ฝน ≥ 90 มม. หรือ ≥ 50 มม. และโอกาส ≥ 80%
+    </footer>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 @echo off
-rem Builds the project (skipping tests) and runs the alerter in one step.
-rem Usage: run <location> [--mock]     e.g.  run Bangkok   /   run "Chiang Mai"   /   run Phuket --mock
+rem Builds the project (skipping tests) and starts the web app in one step.
+rem Usage: run      then open http://localhost:8080   (set PORT to use another port)
 setlocal
 pushd "%~dp0"
 
@@ -21,7 +21,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-java -jar target\app.jar %*
+java -jar target\app.jar
 set "EXIT_CODE=%ERRORLEVEL%"
 popd
 exit /b %EXIT_CODE%

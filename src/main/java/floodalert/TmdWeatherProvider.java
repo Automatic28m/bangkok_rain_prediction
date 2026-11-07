@@ -55,7 +55,7 @@ public class TmdWeatherProvider implements WeatherProvider {
             throw new WeatherException("Invalid or missing API token");
         }
         if (status == 422) {
-            throw new WeatherException("Location not found: " + location);
+            throw new LocationNotFoundException("Location not found: " + location);
         }
         if (status == 429) {
             // TMD allows roughly 60 requests per minute per token
@@ -130,7 +130,7 @@ public class TmdWeatherProvider implements WeatherProvider {
     /** Accepts a name known to {@link ThaiLocations} or "lat,lon". */
     private static double[] resolve(String location) throws WeatherException {
         if (location == null || location.isBlank()) {
-            throw new WeatherException("Location not found: " + location);
+            throw new LocationNotFoundException("Location not found: " + location);
         }
         double[] known = ThaiLocations.find(location);
         if (known != null) {
@@ -145,6 +145,6 @@ public class TmdWeatherProvider implements WeatherProvider {
                 // fall through to "not found"
             }
         }
-        throw new WeatherException("Location not found: " + location);
+        throw new LocationNotFoundException("Location not found: " + location);
     }
 }

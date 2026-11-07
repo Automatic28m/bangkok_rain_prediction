@@ -30,11 +30,11 @@ public class MockWeatherProvider implements WeatherProvider {
     @Override
     public WeatherData fetch(String location) throws WeatherException {
         if (location == null || location.isBlank()) {
-            throw new WeatherException("Location not found: " + location);
+            throw new LocationNotFoundException("Location not found: " + location);
         }
         WeatherData weather = data.get(normalize(location));
         if (weather == null) {
-            throw new WeatherException("Location not found: " + location);
+            throw new LocationNotFoundException("Location not found: " + location);
         }
         return weather;
     }

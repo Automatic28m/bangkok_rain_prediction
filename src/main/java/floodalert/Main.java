@@ -1,84 +1,49 @@
 package floodalert;
 
-import java.io.PrintStream;
+import floodalert.web.RiskController;
+import floodalert.web.WebServer;
 
 /**
- * Command-line entry point.
+ * Entry point: wires the domain objects together and starts the web server.
  *
- * <pre>java -jar app.jar &lt;location&gt; [--mock]</pre>
+ * <pre>java -jar app.jar</pre>
  *
- * Exit codes: 0 success, 1 invalid arguments or missing token, 2 weather data error.
+ * Environment variables:
+ * <ul>
+ *   <li>{@code TMD_API_TOKEN} - token for live TMD data (mock data works without it)</li>
+ *   <li>{@code PORT} - HTTP port, default 8080</li>
+ * </ul>
  */
 public class Main {
 
-    static final int EXIT_OK = 0;
-    static final int EXIT_USAGE = 1;
-    static final int EXIT_WEATHER_ERROR = 2;
-
     static final String TOKEN_ENV = "TMD_API_TOKEN";
-    static final String MOCK_FLAG = "--mock";
-    static final String USAGE = "Usage: java -jar app.jar <location> [--mock]";
+    static final String PORT_ENV = "PORT";
+    static final int DEFAULT_PORT = 8080;
 
     public static void main(String[] args) {
-        boolean useColor = System.console() != null && System.getenv("NO_COLOR") == null;
-        int exitCode = run(args, System.getenv(TOKEN_ENV), System.out, System.err, useColor);
-        System.exit(exitCode);
+        int port = parsePort(System.getenv(PORT_ENV));
+        WebServer server = new WebServer(createController(System.getenv(TOKEN_ENV)));
+        server.start(port);
+        System.out.println("Flood Risk Alerter running at http://localhost:" + port);
     }
 
-    /**
-     * Runs the program without exiting the JVM, so it can be tested.
-     *
-     * @param args     command-line arguments
-     * @param apiToken value of {@code TMD_API_TOKEN}; may be null when {@code --mock} is used
-     * @return the process exit code
-     */
-    static int run(String[] args, String apiToken, PrintStream out, PrintStream err,
-                   boolean useColor) {
-        String location = null;
-        boolean mock = false;
-        for (String arg : args) {
-            if (MOCK_FLAG.equals(arg)) {
-                mock = true;
-            } else if (arg.startsWith("--")) {
-                return usageError(err, "Unknown option: " + arg);
-            } else if (location != null) {
-                return usageError(err, "Too many arguments: " + arg);
-            } else {
-                location = arg;
-            }
-        }
-        if (location == null || location.isBlank()) {
-            return usageError(err, "Missing <location>");
-        }
-
-        WeatherProvider provider;
-        if (mock) {
-            provider = new MockWeatherProvider();
-        } else if (apiToken == null || apiToken.isBlank()) {
-            return usageError(err, TOKEN_ENV + " is not set (use " + MOCK_FLAG + " to run without it)");
-        } else {
-            provider = new TmdWeatherProvider(apiToken.trim());
-        }
-
-        return run(location, provider, new RiskAnalyzer(), new AlertPrinter(out, useColor), err);
+    /** Builds the controller with a live provider (or a stand-in when no token is set). */
+    static RiskController createController(String apiToken) {
+        WeatherProvider liveProvider = (apiToken == null || apiToken.isBlank())
+                ? new UnavailableWeatherProvider(TOKEN_ENV + " is not set on the server, "
+                        + "use mock data or set the token and restart")
+                : new TmdWeatherProvider(apiToken.trim());
+        return new RiskController(liveProvider, new MockWeatherProvider(), new RiskAnalyzer());
     }
 
-    /** Fetches, analyzes and prints using the given collaborators. */
-    static int run(String location, WeatherProvider provider, RiskAnalyzer analyzer,
-                   AlertPrinter printer, PrintStream err) {
+    static int parsePort(String value) {
+        if (value == null || value.isBlank()) {
+            return DEFAULT_PORT;
+        }
         try {
-            WeatherData data = provider.fetch(location);
-            printer.print(analyzer.analyze(data));
-            return EXIT_OK;
-        } catch (WeatherException e) {
-            err.println("Error: " + e.getMessage());
-            return EXIT_WEATHER_ERROR;
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(PORT_ENV + " must be a number but was " + value, e);
         }
-    }
-
-    private static int usageError(PrintStream err, String message) {
-        err.println("Error: " + message);
-        err.println(USAGE);
-        return EXIT_USAGE;
     }
 }
