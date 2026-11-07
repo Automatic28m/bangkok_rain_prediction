@@ -15,13 +15,13 @@ import java.util.Objects;
  */
 public class RiskAnalyzer {
 
-    static final double DANGER_RAIN_MM = 90.0;
-    static final double DANGER_COMBINED_RAIN_MM = 50.0;
-    static final int DANGER_COMBINED_CHANCE_PERCENT = 80;
+    public static final double DANGER_RAIN_MM = 90.0;
+    public static final double DANGER_COMBINED_RAIN_MM = 50.0;
+    public static final int DANGER_COMBINED_CHANCE_PERCENT = 80;
 
-    static final double WARNING_RAIN_MM = 35.0;
-    static final double WARNING_COMBINED_RAIN_MM = 20.0;
-    static final int WARNING_COMBINED_CHANCE_PERCENT = 70;
+    public static final double WARNING_RAIN_MM = 35.0;
+    public static final double WARNING_COMBINED_RAIN_MM = 20.0;
+    public static final int WARNING_COMBINED_CHANCE_PERCENT = 70;
 
     /**
      * @param data the forecast to assess, not null

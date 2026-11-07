@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ระบบแจ้งเตือนความเสี่ยงน้ำท่วม</title>
+    <meta name="description" content="พยากรณ์ฝน 24 ชั่วโมงข้างหน้าจากกรมอุตุนิยมวิทยา สรุปเป็นระดับความเสี่ยงน้ำท่วมที่เข้าใจง่าย">
+    <link rel="preload" href="fonts/InterDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/Inter-Medium.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/Inter-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/NotoSansThai-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/NotoSansThai-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="page">
+
+    <header class="intro">
+        <h1 class="headline">
+            <span class="line">รู้ทันฝน</span>
+            <span class="line">อุ่นใจทุกวัน</span>
+        </h1>
+        <p class="lede">พยากรณ์ฝน 24 ชั่วโมงข้างหน้าจากกรมอุตุนิยมวิทยา<br class="br-wide">
+            สรุปเป็นระดับความเสี่ยงน้ำท่วมที่เข้าใจได้ทันที</p>
+    </header>
+
+    <div class="tabs-row">
+    <div class="tabs" role="tablist" aria-label="แหล่งข้อมูล">
+        <button class="tab" role="tab" type="button" id="tab-live" data-mode="live" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15.5h10a4 4 0 0 0 .4-8A5.5 5.5 0 0 0 6.6 8.6 3.5 3.5 0 0 0 7 15.5Z"/><path d="M8.5 18.5 8 20.5M12.5 18.5l-.5 2M16.5 18.5l-.5 2"/></svg>
+            พยากรณ์จริง
+        </button>
+        <button class="tab" role="tab" type="button" id="tab-mock" data-mode="mock" aria-selected="false" tabindex="-1">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3.5h5M10 3.5v6L4.8 18.2A1.5 1.5 0 0 0 6.1 20.5h11.8a1.5 1.5 0 0 0 1.3-2.3L14 9.5v-6"/><path d="M7.5 14.5h9"/></svg>
+            ข้อมูลจำลอง
+        </button>
+    </div>
+        <a class="about-link" href="/about.html">
+            ความเป็นมาของโครงงาน
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+    </div>
+
+    <form class="search" id="risk-form" autocomplete="off" role="search">
+        <label class="field field-where" for="location">
+            <span class="field-label">สถานที่</span>
+            <span class="field-value">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+                <input id="location" name="location" list="provinces" value="Bangkok"
+                       placeholder="ชื่อจังหวัด (อังกฤษ) หรือ lat,lon" required spellcheck="false">
+            </span>
+        </label>
+        <div class="field">
+            <span class="field-label">ช่วงพยากรณ์</span>
+            <span class="field-value">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+                <span id="window-value">24 ชั่วโมงข้างหน้า</span>
+            </span>
+        </div>
+        <div class="field">
+            <span class="field-label">แหล่งข้อมูล</span>
+            <span class="field-value">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg>
+                <span id="source-value">กรมอุตุนิยมวิทยา</span>
+            </span>
+        </div>
+        <div class="search-action">
+            <button class="search-button" type="submit" id="submit">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+                <span id="submit-text">ตรวจสอบ</span>
+            </button>
+        </div>
+        <datalist id="provinces"></datalist>
+    </form>
+
+    <section class="stage" aria-live="polite" aria-busy="false" id="stage">
+        <p class="dash-error" id="dash-error" role="alert" hidden></p>
+
+        <div class="dash" id="dash">
+            <article class="panel summary" aria-label="สรุปผล">
+                <div class="status" id="status">
+                    <span class="status-icon" id="status-icon" aria-hidden="true"></span>
+                    <span class="status-label" id="status-label">—</span>
+                    <span class="status-caption">ความเสี่ยงน้ำท่วม</span>
+                </div>
+                <h2 class="place" id="place">—</h2>
+                <p class="meta" id="meta">&nbsp;</p>
+
+                <div class="hero">
+                    <p class="hero-label">ปริมาณฝนรวม 24 ชั่วโมง</p>
+                    <p class="hero-value"><span id="total">–</span><span class="unit">มม.</span></p>
+                    <div class="meter" id="meter" role="img" aria-label="ปริมาณฝนรวมเทียบเกณฑ์">
+                        <div class="meter-track"><div class="meter-fill" id="meter-fill"></div></div>
+                        <div class="meter-ticks" id="meter-ticks"></div>
+                    </div>
+                </div>
+
+                <dl class="tiles">
+                    <div><dt>โอกาสฝน</dt><dd id="chance">–</dd></div>
+                    <div><dt>ฝนหนักสุด</dt><dd id="peak">–</dd></div>
+                    <div><dt>ชั่วโมงที่มีฝน</dt><dd id="rainy">–</dd></div>
+                </dl>
+                <p class="reason" id="reason"></p>
+            </article>
+
+            <article class="panel chart-panel hourly">
+                <header class="panel-head">
+                    <div>
+                        <h3>ฝนรายชั่วโมง</h3>
+                        <p>มิลลิเมตร · 24 ชั่วโมงข้างหน้า (เวลาไทย)</p>
+                    </div>
+                    <button class="view-toggle" type="button" id="table-toggle" aria-pressed="false">ตาราง</button>
+                </header>
+                <div class="chart" id="chart-hourly"></div>
+                <div class="table-view" id="table-hourly" hidden></div>
+            </article>
+
+            <article class="panel chart-panel cumulative">
+                <header class="panel-head">
+                    <div>
+                        <h3>ฝนสะสม</h3>
+                        <p>ยอดรวมเทียบระดับเฝ้าระวังและระดับอันตราย</p>
+                    </div>
+                </header>
+                <div class="chart" id="chart-cumulative"></div>
+            </article>
+
+            <article class="panel chart-panel matrix">
+                <header class="panel-head">
+                    <div>
+                        <h3>เกณฑ์ความเสี่ยง</h3>
+                        <p>ปริมาณฝนรวม × โอกาสฝน แบ่งโซนตามกฎด้านล่าง</p>
+                    </div>
+                </header>
+                <div class="chart" id="chart-matrix"></div>
+                <ol class="rules" id="rules"></ol>
+            </article>
+        </div>
+
+        <div class="tooltip" id="tooltip" role="presentation" hidden></div>
+    </section>
+
+</main>
+<script src="app.js"></script>
+</body>
+</html>

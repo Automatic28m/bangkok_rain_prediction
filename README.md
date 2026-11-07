@@ -1,6 +1,6 @@
 # Bangkok Rain Prediction — Real-time Flood Risk Alerter
 
-ระบบแจ้งเตือนความเสี่ยงน้ำท่วมแบบเรียลไทม์ — แอปพลิเคชัน Java ที่ทำงานผ่าน Command-line ดึงข้อมูลพยากรณ์ฝนสดจากกรมอุตุนิยมวิทยา (TMD)
+ระบบแจ้งเตือนความเสี่ยงน้ำท่วมแบบเรียลไทม์ — เว็บแอปพลิเคชัน Java ดึงข้อมูลพยากรณ์ฝนสดจากกรมอุตุนิยมวิทยา (TMD)
 แล้วประเมินและแจ้งระดับความเสี่ยงเป็น **SAFE**, **WARNING** หรือ **DANGER**
 
 > Mini Project — Object Oriented Software Engineering Laboratory (ทำงาน 2 คน ภายใน 1 วัน)
@@ -9,11 +9,11 @@
 
 ## คุณสมบัติ
 
-- **Java CLI** — รวดเร็ว น้ำหนักเบา รันคำสั่งเดียวจบ
+- **Web app** — backend Java + Javalin, หน้าเว็บ HTML/JS ล้วน (ไม่ต้องใช้ Node.js) รวมอยู่ใน jar เดียว
 - **ออกแบบด้วย OOP** — แยกชั้นข้อมูล / การประเมิน / การแสดงผล ต่อยอดได้ง่าย
 - **Stateless, ไม่มีฐานข้อมูล** — ดึงข้อมูลสดทุกครั้งที่รัน ("เรียลไทม์" = ข้อมูลล่าสุด ณ ตอนรัน)
 - **ประเมินจาก 2 ค่า** — ปริมาณฝน (มม.) และโอกาสฝนตก (%)
-- **Mock mode** — ใช้ข้อมูลจำลองสำหรับเดโมหรือตอน API มีปัญหา
+- **Mock mode** — เลือกแท็บ "Mock data" บนหน้าเว็บ สำหรับเดโมหรือตอน API มีปัญหา
 - **ขยายได้** — เพิ่มแหล่งข้อมูลอื่น (เช่น ThaiWater, BMA) ได้โดย implement `WeatherProvider` ตัวใหม่
 
 ---
@@ -35,13 +35,15 @@
 ## สถาปัตยกรรม
 
 ```
- args ──► Main ──► WeatherProvider.fetch(location) ──► WeatherData
-                         ▲                                   │
-              ┌──────────┴──────────┐                        ▼
-       TmdWeatherProvider   MockWeatherProvider        RiskAnalyzer.analyze()
-                                                             │
-                                                             ▼
-                                                        RiskResult ──► AlertPrinter ──► Terminal
+ Browser (index.html + app.js)
+    │  GET /api/risk?location=Bangkok[&mock=true]
+    ▼
+ WebServer (Javalin) ──► RiskController ──► WeatherProvider.fetch(location) ──► WeatherData
+                                                  ▲                                  │
+                         ┌────────────────────────┼──────────────────────┐           ▼
+                TmdWeatherProvider   MockWeatherProvider   UnavailableWeatherProvider  RiskAnalyzer.analyze()
+                                                                                     │
+                                         RiskResponse (JSON) ◄── RiskResult ◄────────┘
 ```
 
 | Class | หน้าที่ |
@@ -50,13 +52,18 @@
 | `TmdWeatherProvider` | เรียก TMD API แล้วแปลง JSON เป็น `WeatherData` |
 | `ThaiLocations` | ตารางพิกัด 77 จังหวัด แปลงชื่อสถานที่เป็น lat/lon |
 | `MockWeatherProvider` | ข้อมูลจำลองสำหรับเดโม / ทดสอบ |
+| `UnavailableWeatherProvider` | ใช้แทน TMD เมื่อไม่ได้ตั้ง token — ตอบ error ที่อ่านเข้าใจได้ทุกครั้ง |
 | `WeatherData` | ข้อมูลสภาพอากาศ: สถานที่, ปริมาณฝน, โอกาสฝนตก |
 | `WeatherException` | ข้อผิดพลาดจากการดึงข้อมูล |
+| `LocationNotFoundException` | ไม่พบสถานที่ (subclass ของ `WeatherException`) |
 | `RiskLevel` | `SAFE`, `WARNING`, `DANGER` |
 | `RiskAnalyzer` | ประเมินระดับความเสี่ยงจาก `WeatherData` |
 | `RiskResult` | ผลการประเมิน + เหตุผล |
-| `AlertPrinter` | แสดงผลแจ้งเตือนแบบอ่านง่าย |
-| `Main` | จุดเริ่มโปรแกรม อ่าน arguments |
+| `web.WebServer` | ตั้งค่า Javalin: เส้นทาง API, ไฟล์หน้าเว็บ, แปลง error เป็น HTTP status |
+| `web.RiskController` | รับคำขอ `/api/risk` เลือก provider แล้วเรียกประเมิน |
+| `web.RiskResponse` / `web.ErrorResponse` | รูปแบบ JSON ที่ส่งกลับ |
+| `AppConfig` | อ่านค่าตั้งค่า (`TMD_API_TOKEN`, `PORT`) จาก `.env` / environment variable |
+| `Main` | จุดเริ่มโปรแกรม ประกอบ object ทั้งหมดแล้วเปิดเว็บเซิร์ฟเวอร์ |
 
 ---
 
@@ -64,7 +71,7 @@
 
 - Java 17 ขึ้นไป
 - Maven 3.8 ขึ้นไป
-- TMD API token (ไม่ต้องใช้ถ้ารันแบบ `--mock`) — สมัครได้ที่ https://data.tmd.go.th
+- TMD API token (ไม่ต้องใช้ถ้าใช้ข้อมูลจำลอง) — สมัครได้ที่ https://data.tmd.go.th
 
 ---
 
@@ -127,45 +134,50 @@ cd bangkok_rain_prediction
 
 1. สมัครสมาชิก / เข้าสู่ระบบที่ https://data.tmd.go.th/nwpapi/
 2. คัดลอก API token ของบัญชี — **เฉพาะตัว token ที่ขึ้นต้นด้วย `eyJ`**
-3. บันทึก token แบบถาวร ตาม[ตั้งค่า API token](#ตั้งค่า-api-token) แบบที่ 2 (Windows ใช้คำสั่งด้านล่าง **ห้ามใช้ `setx`**):
+3. คัดลอกไฟล์ตัวอย่างเป็น `.env` แล้ววาง token หลัง `TMD_API_TOKEN=`:
 
-   ```powershell
-   [Environment]::SetEnvironmentVariable('TMD_API_TOKEN', '<your-token>', 'User')
+   ```bash
+   cp .env.example .env       # macOS / Linux / Git Bash
+   copy .env.example .env     # Windows
    ```
 
-4. **ปิดแล้วเปิด terminal ใหม่**
+   ```
+   TMD_API_TOKEN=eyJ...
+   ```
 
-ข้ามขั้นนี้ได้ถ้าจะใช้แค่ `--mock`
+ข้ามขั้นนี้ได้ถ้าจะใช้แค่ข้อมูลจำลอง
 
-### ขั้นที่ 5 — ลองรัน
+### ขั้นที่ 5 — เปิดเว็บแอป
 
 ในโฟลเดอร์โปรเจกต์:
 
 ```powershell
-# Windows
-.\run Bangkok --mock      # ข้อมูลจำลอง — ใช้ได้แม้ยังไม่มี token
-.\run Bangkok             # ข้อมูลจริงจาก TMD
+.
+un          # Windows
 ```
 
 ```bash
-# macOS / Linux / Git Bash
-./run.sh Bangkok --mock
-./run.sh Bangkok
+./run.sh       # macOS / Linux / Git Bash
 ```
 
-ครั้งแรกจะช้ากว่าปกติ (Maven ดาวน์โหลด dependency) ถ้าเห็นผลขึ้นต้นด้วย `[SAFE]`, `[WARNING]` หรือ `[DANGER]` แสดงว่าพร้อมใช้งาน
+เมื่อเห็น `Flood Risk Alerter running at http://localhost:8080` ให้เปิด http://localhost:8080 ในเบราว์เซอร์
+พิมพ์ชื่อจังหวัด (เช่น `Bangkok`) ในช่อง **Where?** แล้วกด **Check risk** — ถ้ายังไม่มี token ให้เลือกแท็บ **Mock data** ก่อน
+กด `Ctrl+C` ใน terminal เพื่อปิดเซิร์ฟเวอร์
+
+ครั้งแรกจะช้ากว่าปกติ (Maven ดาวน์โหลด dependency)
 
 ### ปัญหาที่เจอบ่อย
 
 | อาการ | วิธีแก้ |
 |-------|---------|
 | `java` / `mvn` is not recognized | ยังไม่ได้ติดตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังแก้ PATH (ถ้าใช้ terminal ใน VS Code / IntelliJ ให้ปิดโปรแกรมแล้วเปิดใหม่) |
-| `TMD_API_TOKEN is not set` | ยังไม่ได้ตั้ง token หรือยังไม่ได้เปิด terminal ใหม่ — หรือใช้ `--mock` |
+| `TMD_API_TOKEN is not set on the server` | ยังไม่มี token ใน `.env` หรือแก้ `.env` หลังเปิดเซิร์ฟเวอร์ — ใส่ token แล้ว `Ctrl+C` รันใหม่ หรือเลือกแท็บ Mock data |
 | `Invalid or missing API token` | token ผิด / ถูกตัด — ตรวจตาม[ตั้งค่า API token](#ตั้งค่า-api-token) (ความยาวต้องมากกว่า 1000 และขึ้นต้นด้วย `eyJ`) |
-| `Too many requests to weather service` | TMD จำกัดประมาณ 60 ครั้งต่อนาที — รอประมาณ 1 นาทีแล้วรันใหม่ |
+| `Too many requests to weather service` | TMD จำกัดประมาณ 60 ครั้งต่อนาที — รอประมาณ 1 นาทีแล้วกดใหม่ |
+| `Address already in use` | พอร์ต 8080 ถูกใช้อยู่ — ปิดโปรแกรมเดิม หรือรันด้วยพอร์ตอื่น เช่น `PORT=8081 ./run.sh` |
 | `The filename, directory name, or volume label syntax is incorrect` | รันคำสั่ง `[Environment]::...` ใน Command Prompt — ให้พิมพ์ `powershell` ก่อนแล้วรันใหม่ |
 | `.\run` is not recognized | ไม่ได้อยู่ในโฟลเดอร์โปรเจกต์ — `cd` ไปที่โฟลเดอร์ที่ clone มา |
-| `Location not found` | ชื่อสะกดไม่ตรงกับ[สถานที่ที่รองรับ](#สถานที่ที่รองรับ) — ตรวจการสะกด หรือใช้พิกัดแทน เช่น `.\run 13.75,100.50` |
+| `Location not found` | ชื่อสะกดไม่ตรงกับ[สถานที่ที่รองรับ](#สถานที่ที่รองรับ) — ตรวจการสะกด หรือใช้พิกัดแทน เช่น `13.75,100.50` |
 | `Error: build failed` | โค้ดมี compile error — แก้ตามข้อความ `[ERROR]` ที่แสดง |
 
 ---
@@ -180,9 +192,21 @@ mvn clean package
 
 ### ตั้งค่า API token
 
-โปรแกรมอ่าน token จาก environment variable `TMD_API_TOKEN` เท่านั้น (ไม่อ่านไฟล์ `.env`) — **ห้ามใส่ token ในโค้ดหรือ commit**
+ตอนเริ่มเซิร์ฟเวอร์ `AppConfig` อ่านค่า `TMD_API_TOKEN` (และ `PORT`) จากไฟล์ `.env` ในโฟลเดอร์ที่รันโปรแกรม (โฟลเดอร์โปรเจกต์ เมื่อใช้สคริปต์ `run`)
+ถ้ามี environment variable ชื่อเดียวกัน ค่าจาก environment variable จะถูกใช้แทนค่าในไฟล์ — **ห้ามใส่ token ในโค้ดหรือ commit** (`.env` อยู่ใน `.gitignore` แล้ว)
+แก้ `.env` แล้วต้องปิดเซิร์ฟเวอร์ (`Ctrl+C`) และรันใหม่
 
 > token ของ TMD ขึ้นต้นด้วย `eyJ` และยาวกว่า 1,000 ตัวอักษร — คัดลอก**เฉพาะตัว token** อย่าให้มีข้อความอื่นติดมา เช่น ชื่อ "Thai Meteorological Department (TMD)" ที่หน้าเว็บแสดงไว้ด้านหน้า
+
+**แนะนำ — ไฟล์ `.env`**
+
+```bash
+cp .env.example .env       # macOS / Linux / Git Bash   (Windows: copy .env.example .env)
+```
+
+แล้วแก้บรรทัด `TMD_API_TOKEN=` ในไฟล์ `.env` ให้เป็น token ของคุณ (ใส่ได้ทั้งแบบมีและไม่มี `"..."`)
+
+ทางเลือกอื่น — ตั้งเป็น environment variable:
 
 **แบบที่ 1 — ใช้เฉพาะ terminal ที่เปิดอยู่** (หายเมื่อปิด terminal)
 
@@ -231,63 +255,68 @@ echo "${TMD_API_TOKEN:0:3}"
 
 | อาการ | สาเหตุ |
 |-------|--------|
-| ความยาวเป็น `0` / ขึ้น error ว่า null | ยังไม่ได้ตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังตั้งแบบที่ 2 |
+| ความยาวเป็น `0` / ขึ้น error ว่า null | ยังไม่ได้ตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังตั้งแบบที่ 2 (ไม่เกี่ยวถ้าใช้ไฟล์ `.env`) |
 | ความยาวเป็น `1024` พอดี | ใช้ `setx` → token ถูกตัด ให้ตั้งใหม่ด้วยคำสั่งในแบบที่ 2 |
 | 3 ตัวแรกไม่ใช่ `eyJ` | มีข้อความอื่นติดมาด้านหน้า token |
 
-ถ้ายังไม่มี token ใช้ `--mock` แทนได้
+ถ้ายังไม่มี token ใช้ข้อมูลจำลองแทนได้
 
 ### รันด้วยคำสั่งเดียว (แนะนำ)
 
-สคริปต์ `run` จะ build โปรเจกต์ (ข้ามเทสต์) แล้วรันโปรแกรมให้ทันที — ไม่ต้องรัน `mvn package` เอง และได้โค้ดล่าสุดทุกครั้ง
+สคริปต์ `run` จะ build โปรเจกต์ (ข้ามเทสต์) แล้วเปิดเว็บเซิร์ฟเวอร์ทันที — ได้โค้ดล่าสุดทุกครั้ง
 
 ```powershell
-# Windows (PowerShell หรือ Command Prompt)
-.\run Bangkok
-.\run "Chiang Mai"
-.\run Phuket --mock
+.
+un          # Windows (PowerShell หรือ Command Prompt)
 ```
 
 ```bash
-# macOS / Linux / Git Bash
-./run.sh Bangkok
-./run.sh Phuket --mock
+./run.sh       # macOS / Linux / Git Bash
 ```
 
-ข้อความระหว่าง build จะแสดงเฉพาะตอน build ไม่ผ่าน และสคริปต์คืน exit code เดียวกับโปรแกรม (ดูตารางด้านล่าง)
+แล้วเปิด http://localhost:8080 — ข้อความระหว่าง build จะแสดงเฉพาะตอน build ไม่ผ่าน
 
-### การใช้งานแบบรัน jar โดยตรง
-
-```
-java -jar target/app.jar <location> [--mock]
-```
-
-| Argument | ความหมาย |
-|----------|----------|
-| `<location>` | ชื่อสถานที่ เช่น `Bangkok` (บังคับ) |
-| `--mock` | ใช้ข้อมูลจำลองแทน API จริง |
-
-ตัวอย่าง:
+### รัน jar โดยตรง
 
 ```bash
-java -jar target/app.jar Bangkok
-java -jar target/app.jar Phuket --mock
+mvn clean package
+java -jar target/app.jar
 ```
 
-ผลลัพธ์:
+| ตัวแปร | ความหมาย |
+|----------------------|----------|
+| `TMD_API_TOKEN` | token สำหรับข้อมูลจริง (ไม่ตั้งก็เปิดเว็บได้ ใช้ได้เฉพาะข้อมูลจำลอง) |
+| `PORT` | พอร์ตของเว็บ ค่าเริ่มต้น `8080` |
+
+ตั้งได้ทั้งในไฟล์ `.env` (ดู [`.env.example`](.env.example)) หรือเป็น environment variable — ถ้ามีทั้งสองที่ ใช้ค่าจาก environment variable
+
+### REST API
+
+หน้าเว็บเรียก API นี้ — ทดลองเรียกเองได้ด้วยเบราว์เซอร์หรือ `curl`
 
 ```
-[DANGER] Phuket
-  Rain        : 95.0 mm
-  Rain chance : 90 %
-  Reason      : Rain 95.0 mm >= 90.0 mm
+GET /api/risk?location=<สถานที่>[&mock=true]
 ```
 
-ข้อมูลจำลองใน `--mock` ครอบคลุมทั้ง 3 ระดับ: `Chiangmai` (SAFE), `Bangkok` (WARNING), `Phuket` (DANGER)
+```bash
+curl "http://localhost:8080/api/risk?location=Phuket&mock=true"
+# {"location":"Phuket","rainMm":95.0,"rainChancePercent":90,"level":"DANGER","reason":"Rain 95.0 mm >= 90.0 mm"}
+```
+
+| Status | ความหมาย |
+|--------|----------|
+| `200` | สำเร็จ — JSON: `location`, `rainMm`, `rainChancePercent`, `level`, `reason` |
+| `400` | ไม่ได้ระบุ `location` |
+| `404` | ไม่พบสถานที่ |
+| `502` | ดึงข้อมูลไม่สำเร็จ (timeout, token ผิด/ไม่ได้ตั้ง, เกิน rate limit) |
+
+error ทุกแบบตอบเป็น `{"error": "<ข้อความ>"}`
+
+ข้อมูลจำลอง (`mock=true`) ครอบคลุมทั้ง 3 ระดับ: `Chiangmai` (SAFE), `Bangkok` (WARNING), `Phuket` (DANGER)
 
 ### สถานที่ที่รองรับ
 
-ใช้กับข้อมูลจริง (ไม่ใช่ `--mock`) ระบุได้ 2 แบบ:
+ใช้กับข้อมูลจริง (ไม่ใช่ข้อมูลจำลอง) ระบุได้ 2 แบบ:
 
 **1. ชื่อจังหวัดภาษาอังกฤษ — ครบ 77 จังหวัด** ไม่สนตัวพิมพ์ เว้นวรรค `-` หรือ `_` (เช่น `"Chiang Mai"`, `chiang-mai`, `CHIANGMAI` ได้ผลเหมือนกัน) ชื่อที่มีเว้นวรรคต้องใส่ `"..."`
 
@@ -303,13 +332,7 @@ java -jar target/app.jar Phuket --mock
 ชื่อเพิ่มเติม: `Ayutthaya`, `Korat` (นครราชสีมา) และเมืองที่ไม่ใช่จังหวัด `Pattaya`, `Hat Yai` — การสะกดติดกันก็ใช้ได้ เช่น `Sisaket`, `Chonburi`, `Lopburi`
 การจัดภาคและพิกัดของแต่ละจังหวัดใช้ตาม TMD (`forecast/location/daily/region`)
 
-**2. พิกัด `lat,lon`** — ใช้ได้ทุกจุดในประเทศไทย (lat 5.61–20.47, lon 97.34–105.64) เช่น `.\run 13.75,100.50`
-
-| Exit code | ความหมาย |
-|-----------|----------|
-| `0` | สำเร็จ |
-| `1` | arguments ผิดรูปแบบ หรือไม่ได้ตั้ง `TMD_API_TOKEN` |
-| `2` | ดึงข้อมูลไม่สำเร็จ (timeout, token ผิด, ไม่พบสถานที่) |
+**2. พิกัด `lat,lon`** — ใช้ได้ทุกจุดในประเทศไทย (lat 5.61–20.47, lon 97.34–105.64) เช่น `13.75,100.50`
 
 ### รันเทสต์
 
@@ -328,11 +351,14 @@ bangkok_rain_prediction/
 │   ├── GIT_FLOW.md      ขั้นตอนการใช้ Git ของทีม
 │   └── CONTRACT.md      ข้อตกลง interface / API / เกณฑ์ประเมิน
 ├── src/
-│   ├── main/java/floodalert/
+│   ├── main/java/floodalert/        domain + Main
+│   ├── main/java/floodalert/web/    ชั้นเว็บ (Javalin)
+│   ├── main/resources/public/       หน้าเว็บ: index.html, style.css, app.js, fonts/ (Inter, JetBrains Mono — SIL OFL)
 │   └── test/java/floodalert/
+├── .env.example         ตัวอย่างไฟล์ตั้งค่า (คัดลอกเป็น .env)
 ├── pom.xml
-├── run.cmd              build + รันในคำสั่งเดียว (Windows)
-├── run.sh               build + รันในคำสั่งเดียว (macOS / Linux)
+├── run.cmd              build + เปิดเว็บในคำสั่งเดียว (Windows)
+├── run.sh               build + เปิดเว็บในคำสั่งเดียว (macOS / Linux)
 └── README.md
 ```
 
@@ -343,7 +369,7 @@ bangkok_rain_prediction/
 | สมาชิก | ส่วนที่รับผิดชอบ |
 |--------|------------------|
 | คน A — Data Layer | `TmdWeatherProvider`, `MockWeatherProvider`, `WeatherException` |
-| คน B — Logic + CLI | `RiskAnalyzer`, `RiskResult`, `AlertPrinter`, `Main` |
+| คน B — Logic + Web | `RiskAnalyzer`, `RiskResult`, `web.*`, หน้าเว็บ, `Main` |
 
 รายละเอียดเพิ่มเติม: [Schedule](docs/SCHEDULE.md) · [Git Flow](docs/GIT_FLOW.md) · [Contract](docs/CONTRACT.md)
 

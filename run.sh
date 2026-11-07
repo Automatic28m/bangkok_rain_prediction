@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-# Builds the project (skipping tests) and runs the alerter in one step.
-# Usage: ./run.sh <location> [--mock]     e.g.  ./run.sh Bangkok   /   ./run.sh "Chiang Mai"   /   ./run.sh Phuket --mock
+# Builds the project (skipping tests) and starts the web app in one step.
+# Usage: ./run.sh      then open http://localhost:8080   (set PORT to use another port)
 
 cd "$(dirname "$0")" || exit 1
 
@@ -19,4 +19,4 @@ if ! mvn -q -B -DskipTests clean package >"$build_log" 2>&1; then
 fi
 rm -f "$build_log"
 
-exec java -jar target/app.jar "$@"
+exec java -jar target/app.jar
