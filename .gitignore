@@ -1,0 +1,21 @@
+# Build output
+target/
+out/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Secrets (TMD_API_TOKEN must come from the environment)
+.env
+*.env
+
+# Logs / OS
+*.log
+.DS_Store
+Thumbs.db
