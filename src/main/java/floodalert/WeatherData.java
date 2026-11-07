@@ -1,5 +1,6 @@
 package floodalert;
 
+import java.util.List;
 import java.util.Objects;
 
 /** Immutable weather forecast for one location. */
@@ -8,14 +9,22 @@ public class WeatherData {
     private final String location;
     private final double rainMm;
     private final int rainChancePercent;
+    private final List<HourlyRain> hourly;
+
+    /** Summary only, without an hourly breakdown. */
+    public WeatherData(String location, double rainMm, int rainChancePercent) {
+        this(location, rainMm, rainChancePercent, List.of());
+    }
 
     /**
      * @param location          location name, not blank
      * @param rainMm            forecast rainfall in millimetres, >= 0
      * @param rainChancePercent chance of rain, 0..100
+     * @param hourly            hour-by-hour forecast in time order, may be empty, not null
      * @throws IllegalArgumentException if any value is out of range
      */
-    public WeatherData(String location, double rainMm, int rainChancePercent) {
+    public WeatherData(String location, double rainMm, int rainChancePercent,
+                       List<HourlyRain> hourly) {
         Objects.requireNonNull(location, "location");
         if (location.isBlank()) {
             throw new IllegalArgumentException("location must not be blank");
@@ -30,6 +39,7 @@ public class WeatherData {
         this.location = location;
         this.rainMm = rainMm;
         this.rainChancePercent = rainChancePercent;
+        this.hourly = List.copyOf(Objects.requireNonNull(hourly, "hourly"));
     }
 
     public String getLocation() {
@@ -42,6 +52,11 @@ public class WeatherData {
 
     public int getRainChancePercent() {
         return rainChancePercent;
+    }
+
+    /** @return the hourly breakdown in time order; empty when the source has none */
+    public List<HourlyRain> getHourly() {
+        return hourly;
     }
 
     @Override

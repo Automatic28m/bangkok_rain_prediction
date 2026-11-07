@@ -13,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -111,11 +113,14 @@ public class TmdWeatherProvider implements WeatherProvider {
 
         double totalRain = 0;
         int rainyHours = 0;
+        List<HourlyRain> hourly = new ArrayList<>();
         for (JsonNode hour : forecasts) {
             JsonNode rain = hour.path("data").path("rain");
-            if (!rain.isNumber()) {
+            String time = hour.path("time").asText("");
+            if (!rain.isNumber() || time.isBlank() || rain.asDouble() < 0) {
                 throw new WeatherException("Unexpected response from weather service");
             }
+            hourly.add(new HourlyRain(time, rain.asDouble()));
             totalRain += rain.asDouble();
             if (rain.asDouble() >= RAINY_HOUR_MIN_MM) {
                 rainyHours++;
@@ -124,7 +129,7 @@ public class TmdWeatherProvider implements WeatherProvider {
 
         double rainMm = Math.round(totalRain * 10) / 10.0;
         int rainChancePercent = (int) Math.round(rainyHours * 100.0 / forecasts.size());
-        return new WeatherData(location.trim(), rainMm, rainChancePercent);
+        return new WeatherData(location.trim(), rainMm, rainChancePercent, hourly);
     }
 
     /** Accepts a name known to {@link ThaiLocations} or "lat,lon". */
