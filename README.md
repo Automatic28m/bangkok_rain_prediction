@@ -62,6 +62,7 @@
 | `web.WebServer` | ตั้งค่า Javalin: เส้นทาง API, ไฟล์หน้าเว็บ, แปลง error เป็น HTTP status |
 | `web.RiskController` | รับคำขอ `/api/risk` เลือก provider แล้วเรียกประเมิน |
 | `web.RiskResponse` / `web.ErrorResponse` | รูปแบบ JSON ที่ส่งกลับ |
+| `AppConfig` | อ่านค่าตั้งค่า (`TMD_API_TOKEN`, `PORT`) จาก `.env` / environment variable |
 | `Main` | จุดเริ่มโปรแกรม ประกอบ object ทั้งหมดแล้วเปิดเว็บเซิร์ฟเวอร์ |
 
 ---
@@ -133,13 +134,16 @@ cd bangkok_rain_prediction
 
 1. สมัครสมาชิก / เข้าสู่ระบบที่ https://data.tmd.go.th/nwpapi/
 2. คัดลอก API token ของบัญชี — **เฉพาะตัว token ที่ขึ้นต้นด้วย `eyJ`**
-3. บันทึก token แบบถาวร ตาม[ตั้งค่า API token](#ตั้งค่า-api-token) แบบที่ 2 (Windows ใช้คำสั่งด้านล่าง **ห้ามใช้ `setx`**):
+3. คัดลอกไฟล์ตัวอย่างเป็น `.env` แล้ววาง token หลัง `TMD_API_TOKEN=`:
 
-   ```powershell
-   [Environment]::SetEnvironmentVariable('TMD_API_TOKEN', '<your-token>', 'User')
+   ```bash
+   cp .env.example .env       # macOS / Linux / Git Bash
+   copy .env.example .env     # Windows
    ```
 
-4. **ปิดแล้วเปิด terminal ใหม่**
+   ```
+   TMD_API_TOKEN=eyJ...
+   ```
 
 ข้ามขั้นนี้ได้ถ้าจะใช้แค่ข้อมูลจำลอง
 
@@ -148,7 +152,8 @@ cd bangkok_rain_prediction
 ในโฟลเดอร์โปรเจกต์:
 
 ```powershell
-.un          # Windows
+.
+un          # Windows
 ```
 
 ```bash
@@ -166,7 +171,7 @@ cd bangkok_rain_prediction
 | อาการ | วิธีแก้ |
 |-------|---------|
 | `java` / `mvn` is not recognized | ยังไม่ได้ติดตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังแก้ PATH (ถ้าใช้ terminal ใน VS Code / IntelliJ ให้ปิดโปรแกรมแล้วเปิดใหม่) |
-| `TMD_API_TOKEN is not set on the server` | ยังไม่ได้ตั้ง token หรือตั้งหลังเปิดเซิร์ฟเวอร์ — ตั้งแล้ว `Ctrl+C` รันใหม่ หรือติ๊กใช้ข้อมูลจำลอง |
+| `TMD_API_TOKEN is not set on the server` | ยังไม่มี token ใน `.env` หรือแก้ `.env` หลังเปิดเซิร์ฟเวอร์ — ใส่ token แล้ว `Ctrl+C` รันใหม่ หรือติ๊กใช้ข้อมูลจำลอง |
 | `Invalid or missing API token` | token ผิด / ถูกตัด — ตรวจตาม[ตั้งค่า API token](#ตั้งค่า-api-token) (ความยาวต้องมากกว่า 1000 และขึ้นต้นด้วย `eyJ`) |
 | `Too many requests to weather service` | TMD จำกัดประมาณ 60 ครั้งต่อนาที — รอประมาณ 1 นาทีแล้วกดใหม่ |
 | `Address already in use` | พอร์ต 8080 ถูกใช้อยู่ — ปิดโปรแกรมเดิม หรือรันด้วยพอร์ตอื่น เช่น `PORT=8081 ./run.sh` |
@@ -187,9 +192,21 @@ mvn clean package
 
 ### ตั้งค่า API token
 
-โปรแกรมอ่าน token จาก environment variable `TMD_API_TOKEN` เท่านั้น (ไม่อ่านไฟล์ `.env`) — **ห้ามใส่ token ในโค้ดหรือ commit**
+ตอนเริ่มเซิร์ฟเวอร์ `AppConfig` อ่านค่า `TMD_API_TOKEN` (และ `PORT`) จากไฟล์ `.env` ในโฟลเดอร์ที่รันโปรแกรม (โฟลเดอร์โปรเจกต์ เมื่อใช้สคริปต์ `run`)
+ถ้ามี environment variable ชื่อเดียวกัน ค่าจาก environment variable จะถูกใช้แทนค่าในไฟล์ — **ห้ามใส่ token ในโค้ดหรือ commit** (`.env` อยู่ใน `.gitignore` แล้ว)
+แก้ `.env` แล้วต้องปิดเซิร์ฟเวอร์ (`Ctrl+C`) และรันใหม่
 
 > token ของ TMD ขึ้นต้นด้วย `eyJ` และยาวกว่า 1,000 ตัวอักษร — คัดลอก**เฉพาะตัว token** อย่าให้มีข้อความอื่นติดมา เช่น ชื่อ "Thai Meteorological Department (TMD)" ที่หน้าเว็บแสดงไว้ด้านหน้า
+
+**แนะนำ — ไฟล์ `.env`**
+
+```bash
+cp .env.example .env       # macOS / Linux / Git Bash   (Windows: copy .env.example .env)
+```
+
+แล้วแก้บรรทัด `TMD_API_TOKEN=` ในไฟล์ `.env` ให้เป็น token ของคุณ (ใส่ได้ทั้งแบบมีและไม่มี `"..."`)
+
+ทางเลือกอื่น — ตั้งเป็น environment variable:
 
 **แบบที่ 1 — ใช้เฉพาะ terminal ที่เปิดอยู่** (หายเมื่อปิด terminal)
 
@@ -238,7 +255,7 @@ echo "${TMD_API_TOKEN:0:3}"
 
 | อาการ | สาเหตุ |
 |-------|--------|
-| ความยาวเป็น `0` / ขึ้น error ว่า null | ยังไม่ได้ตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังตั้งแบบที่ 2 |
+| ความยาวเป็น `0` / ขึ้น error ว่า null | ยังไม่ได้ตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังตั้งแบบที่ 2 (ไม่เกี่ยวถ้าใช้ไฟล์ `.env`) |
 | ความยาวเป็น `1024` พอดี | ใช้ `setx` → token ถูกตัด ให้ตั้งใหม่ด้วยคำสั่งในแบบที่ 2 |
 | 3 ตัวแรกไม่ใช่ `eyJ` | มีข้อความอื่นติดมาด้านหน้า token |
 
@@ -249,7 +266,8 @@ echo "${TMD_API_TOKEN:0:3}"
 สคริปต์ `run` จะ build โปรเจกต์ (ข้ามเทสต์) แล้วเปิดเว็บเซิร์ฟเวอร์ทันที — ได้โค้ดล่าสุดทุกครั้ง
 
 ```powershell
-.un          # Windows (PowerShell หรือ Command Prompt)
+.
+un          # Windows (PowerShell หรือ Command Prompt)
 ```
 
 ```bash
@@ -265,10 +283,12 @@ mvn clean package
 java -jar target/app.jar
 ```
 
-| Environment variable | ความหมาย |
+| ตัวแปร | ความหมาย |
 |----------------------|----------|
 | `TMD_API_TOKEN` | token สำหรับข้อมูลจริง (ไม่ตั้งก็เปิดเว็บได้ ใช้ได้เฉพาะข้อมูลจำลอง) |
 | `PORT` | พอร์ตของเว็บ ค่าเริ่มต้น `8080` |
+
+ตั้งได้ทั้งในไฟล์ `.env` (ดู [`.env.example`](.env.example)) หรือเป็น environment variable — ถ้ามีทั้งสองที่ ใช้ค่าจาก environment variable
 
 ### REST API
 
@@ -335,6 +355,7 @@ bangkok_rain_prediction/
 │   ├── main/java/floodalert/web/    ชั้นเว็บ (Javalin)
 │   ├── main/resources/public/       หน้าเว็บ: index.html, style.css, app.js
 │   └── test/java/floodalert/
+├── .env.example         ตัวอย่างไฟล์ตั้งค่า (คัดลอกเป็น .env)
 ├── pom.xml
 ├── run.cmd              build + เปิดเว็บในคำสั่งเดียว (Windows)
 ├── run.sh               build + เปิดเว็บในคำสั่งเดียว (macOS / Linux)
