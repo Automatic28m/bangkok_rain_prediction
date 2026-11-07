@@ -13,7 +13,7 @@
 - **ออกแบบด้วย OOP** — แยกชั้นข้อมูล / การประเมิน / การแสดงผล ต่อยอดได้ง่าย
 - **Stateless, ไม่มีฐานข้อมูล** — ดึงข้อมูลสดทุกครั้งที่รัน ("เรียลไทม์" = ข้อมูลล่าสุด ณ ตอนรัน)
 - **ประเมินจาก 2 ค่า** — ปริมาณฝน (มม.) และโอกาสฝนตก (%)
-- **Mock mode** — ติ๊ก "ใช้ข้อมูลจำลอง" บนหน้าเว็บ สำหรับเดโมหรือตอน API มีปัญหา
+- **Mock mode** — เลือกแท็บ "Mock data" บนหน้าเว็บ สำหรับเดโมหรือตอน API มีปัญหา
 - **ขยายได้** — เพิ่มแหล่งข้อมูลอื่น (เช่น ThaiWater, BMA) ได้โดย implement `WeatherProvider` ตัวใหม่
 
 ---
@@ -161,7 +161,7 @@ un          # Windows
 ```
 
 เมื่อเห็น `Flood Risk Alerter running at http://localhost:8080` ให้เปิด http://localhost:8080 ในเบราว์เซอร์
-พิมพ์ชื่อจังหวัด (เช่น `Bangkok`) แล้วกด **ตรวจสอบ** — ถ้ายังไม่มี token ให้ติ๊ก **ใช้ข้อมูลจำลอง** ก่อน
+พิมพ์ชื่อจังหวัด (เช่น `Bangkok`) ในช่อง **Where?** แล้วกด **Check risk** — ถ้ายังไม่มี token ให้เลือกแท็บ **Mock data** ก่อน
 กด `Ctrl+C` ใน terminal เพื่อปิดเซิร์ฟเวอร์
 
 ครั้งแรกจะช้ากว่าปกติ (Maven ดาวน์โหลด dependency)
@@ -171,7 +171,7 @@ un          # Windows
 | อาการ | วิธีแก้ |
 |-------|---------|
 | `java` / `mvn` is not recognized | ยังไม่ได้ติดตั้ง หรือยังไม่ได้เปิด terminal ใหม่หลังแก้ PATH (ถ้าใช้ terminal ใน VS Code / IntelliJ ให้ปิดโปรแกรมแล้วเปิดใหม่) |
-| `TMD_API_TOKEN is not set on the server` | ยังไม่มี token ใน `.env` หรือแก้ `.env` หลังเปิดเซิร์ฟเวอร์ — ใส่ token แล้ว `Ctrl+C` รันใหม่ หรือติ๊กใช้ข้อมูลจำลอง |
+| `TMD_API_TOKEN is not set on the server` | ยังไม่มี token ใน `.env` หรือแก้ `.env` หลังเปิดเซิร์ฟเวอร์ — ใส่ token แล้ว `Ctrl+C` รันใหม่ หรือเลือกแท็บ Mock data |
 | `Invalid or missing API token` | token ผิด / ถูกตัด — ตรวจตาม[ตั้งค่า API token](#ตั้งค่า-api-token) (ความยาวต้องมากกว่า 1000 และขึ้นต้นด้วย `eyJ`) |
 | `Too many requests to weather service` | TMD จำกัดประมาณ 60 ครั้งต่อนาที — รอประมาณ 1 นาทีแล้วกดใหม่ |
 | `Address already in use` | พอร์ต 8080 ถูกใช้อยู่ — ปิดโปรแกรมเดิม หรือรันด้วยพอร์ตอื่น เช่น `PORT=8081 ./run.sh` |
@@ -353,7 +353,7 @@ bangkok_rain_prediction/
 ├── src/
 │   ├── main/java/floodalert/        domain + Main
 │   ├── main/java/floodalert/web/    ชั้นเว็บ (Javalin)
-│   ├── main/resources/public/       หน้าเว็บ: index.html, style.css, app.js
+│   ├── main/resources/public/       หน้าเว็บ: index.html, style.css, app.js, fonts/ (Inter, JetBrains Mono — SIL OFL)
 │   └── test/java/floodalert/
 ├── .env.example         ตัวอย่างไฟล์ตั้งค่า (คัดลอกเป็น .env)
 ├── pom.xml

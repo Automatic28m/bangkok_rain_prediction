@@ -1,39 +1,81 @@
 <!doctype html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flood Risk Alerter</title>
+    <meta name="description" content="Live 24-hour rain forecasts from the Thai Meteorological Department, turned into one clear flood-risk level.">
+    <link rel="preload" href="fonts/InterDisplay-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/Inter-Medium.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="container">
-    <header>
-        <h1>Flood Risk Alerter</h1>
-        <p class="subtitle">ระบบแจ้งเตือนความเสี่ยงน้ำท่วมจากพยากรณ์ฝนของกรมอุตุนิยมวิทยา</p>
+<main class="page">
+
+    <header class="intro">
+        <h1 class="headline">
+            <span class="line">Know the rain.</span>
+            <span class="line">Rest easy.</span>
+        </h1>
+        <p class="lede">Live 24-hour rain forecasts from the Thai Meteorological<br class="br-wide">
+            Department, turned into one clear flood-risk level.</p>
     </header>
 
-    <form id="risk-form" class="card" autocomplete="off">
-        <label for="location">จังหวัด หรือพิกัด <code>lat,lon</code></label>
-        <div class="row">
-            <input id="location" name="location" list="provinces"
-                   placeholder="เช่น Bangkok, Chiang Mai, 13.75,100.50" required>
-            <button type="submit" id="submit">ตรวจสอบ</button>
+    <div class="tabs" role="tablist" aria-label="Data source">
+        <button class="tab" role="tab" type="button" id="tab-live" data-mode="live" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15.5h10a4 4 0 0 0 .4-8A5.5 5.5 0 0 0 6.6 8.6 3.5 3.5 0 0 0 7 15.5Z"/><path d="M8.5 18.5 8 20.5M12.5 18.5l-.5 2M16.5 18.5l-.5 2"/></svg>
+            Live forecast
+        </button>
+        <button class="tab" role="tab" type="button" id="tab-mock" data-mode="mock" aria-selected="false" tabindex="-1">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 3.5h5M10 3.5v6L4.8 18.2A1.5 1.5 0 0 0 6.1 20.5h11.8a1.5 1.5 0 0 0 1.3-2.3L14 9.5v-6"/><path d="M7.5 14.5h9"/></svg>
+            Mock data
+        </button>
+    </div>
+
+    <form class="search" id="risk-form" autocomplete="off" role="search">
+        <label class="field field-where" for="location">
+            <span class="field-label">Where?</span>
+            <span class="field-value">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+                <input id="location" name="location" list="provinces" value="Bangkok"
+                       placeholder="Province or lat,lon" required spellcheck="false">
+            </span>
+        </label>
+        <div class="field">
+            <span class="field-label">Forecast</span>
+            <span class="field-value">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+                <span id="window-value">Next 24 hours</span>
+            </span>
+        </div>
+        <div class="field">
+            <span class="field-label">Source</span>
+            <span class="field-value">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg>
+                <span id="source-value">TMD live data</span>
+            </span>
+        </div>
+        <div class="search-action">
+            <button class="search-button" type="submit" id="submit">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+                <span id="submit-text">Check risk</span>
+            </button>
         </div>
         <datalist id="provinces"></datalist>
-        <label class="checkbox">
-            <input type="checkbox" id="mock"> ใช้ข้อมูลจำลอง (Bangkok, Chiangmai, Phuket)
-        </label>
     </form>
 
-    <section id="result" aria-live="polite"></section>
+    <section class="stage">
+        <div class="photo">
+            <img src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/bd8d16a6-ac46-4cb8-bf0b-fb8e732ed31a.webp"
+                 alt="A still fjord at blue hour: dark cliffs with low clouds, a waterfall and a red cabin mirrored in the water"
+                 width="1280" height="720" fetchpriority="high">
+            <video id="fjord-video" muted loop playsinline preload="auto" aria-hidden="true"
+                   data-src="https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/62b7e754-022b-4512-9b96-513173cb2e14.mp4"></video>
+            <p class="chip"><strong>Geirangerfjord, Norge</strong> <span class="mono">62.10° N</span></p>
+        </div>
+        <div id="result" aria-live="polite"></div>
+    </section>
 
-    <footer class="legend">
-        <span class="badge SAFE">SAFE</span>
-        <span class="badge WARNING">WARNING</span> ฝน ≥ 35 มม. หรือ ≥ 20 มม. และโอกาส ≥ 70%
-        <br>
-        <span class="badge DANGER">DANGER</span> ฝน ≥ 90 มม. หรือ ≥ 50 มม. และโอกาส ≥ 80%
-    </footer>
 </main>
 <script src="app.js"></script>
 </body>

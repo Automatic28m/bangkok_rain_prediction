@@ -18,50 +18,96 @@ const PROVINCES = [
     "Ayutthaya", "Korat", "Pattaya", "Hat Yai"
 ];
 
+/** Places that exist in the server's mock data set. */
+const MOCK_PLACES = ["Bangkok", "Chiangmai", "Phuket"];
+
+const MODES = {
+    live: { source: "TMD live data", window: "Next 24 hours", meta: "Next 24 hours · TMD", places: PROVINCES },
+    mock: { source: "Mock sample", window: "Fixed sample", meta: "Mock sample data", places: MOCK_PLACES }
+};
+
 const form = document.getElementById("risk-form");
 const locationInput = document.getElementById("location");
-const mockInput = document.getElementById("mock");
 const submitButton = document.getElementById("submit");
+const submitText = document.getElementById("submit-text");
+const sourceValue = document.getElementById("source-value");
+const windowValue = document.getElementById("window-value");
+const datalist = document.getElementById("provinces");
 const resultBox = document.getElementById("result");
+const tabs = Array.from(document.querySelectorAll(".tab"));
 
-document.getElementById("provinces").append(
-    ...PROVINCES.map(name => Object.assign(document.createElement("option"), { value: name }))
-);
+let mode = "live";
+
+/* ---------- Tabs: switch between live and mock data ---------- */
+
+function selectMode(next, focus) {
+    mode = next;
+    tabs.forEach(tab => {
+        const active = tab.dataset.mode === next;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focus) {
+            tab.focus();
+        }
+    });
+    sourceValue.textContent = MODES[next].source;
+    windowValue.textContent = MODES[next].window;
+    datalist.replaceChildren(...MODES[next].places.map(name =>
+        Object.assign(document.createElement("option"), { value: name })));
+    resultBox.replaceChildren();
+}
+
+tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => selectMode(tab.dataset.mode, false));
+    tab.addEventListener("keydown", event => {
+        if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+            const step = event.key === "ArrowRight" ? 1 : -1;
+            const next = tabs[(index + step + tabs.length) % tabs.length];
+            selectMode(next.dataset.mode, true);
+            event.preventDefault();
+        }
+    });
+});
+
+selectMode("live", false);
+
+/* ---------- Search: call the risk API ---------- */
 
 form.addEventListener("submit", async event => {
     event.preventDefault();
     const params = new URLSearchParams({ location: locationInput.value.trim() });
-    if (mockInput.checked) {
+    if (mode === "mock") {
         params.set("mock", "true");
     }
 
     submitButton.disabled = true;
-    submitButton.textContent = "กำลังโหลด…";
+    submitText.textContent = "Checking…";
     try {
         const response = await fetch("/api/risk?" + params);
         const body = await response.json();
         if (response.ok) {
             renderResult(body);
         } else {
-            renderError(body.error || "เกิดข้อผิดพลาด (HTTP " + response.status + ")");
+            renderError(body.error || "Something went wrong (HTTP " + response.status + ")");
         }
     } catch (e) {
-        renderError("ติดต่อเซิร์ฟเวอร์ไม่ได้");
+        renderError("Cannot reach the server");
     } finally {
         submitButton.disabled = false;
-        submitButton.textContent = "ตรวจสอบ";
+        submitText.textContent = "Check risk";
     }
 });
 
 function renderResult(risk) {
-    resultBox.replaceChildren(element("div", "card result " + risk.level, [
-        element("h2", null, [
+    resultBox.replaceChildren(element("article", "card " + risk.level, [
+        element("div", "card-top", [
             element("span", "badge " + risk.level, risk.level),
-            element("span", null, risk.location)
+            element("span", "card-meta", MODES[mode].meta)
         ]),
+        element("h2", "card-location", risk.location),
         element("dl", "stats", [
-            stat("ปริมาณฝน", risk.rainMm.toFixed(1) + " มม."),
-            stat("โอกาสฝนตก", risk.rainChancePercent + " %")
+            stat("Rain", risk.rainMm.toFixed(1) + " mm"),
+            stat("Rain chance", risk.rainChancePercent + " %")
         ]),
         element("p", "reason", risk.reason)
     ]));
@@ -87,4 +133,14 @@ function element(tag, className, content) {
         node.textContent = content;
     }
     return node;
+}
+
+/* ---------- Fjord video: load only when motion is allowed, fade in on first frame ---------- */
+
+const video = document.getElementById("fjord-video");
+if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    const reveal = () => video.classList.add("is-ready");
+    video.addEventListener("playing", reveal, { once: true });
+    video.src = video.dataset.src;
+    video.play().catch(() => { /* autoplay blocked: the still photo stays */ });
 }
