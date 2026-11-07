@@ -36,6 +36,10 @@ class WebServerTest {
             assertEquals(80, body.get("rainChancePercent").asInt());
             assertEquals("WARNING", body.get("level").asText());
             assertTrue(body.get("reason").asText().contains("42.0"));
+            assertEquals(24, body.get("hourly").size());
+            assertTrue(body.get("hourly").get(0).get("time").asText().endsWith("+07:00"));
+            assertEquals(35.0, body.get("thresholds").get("warningRainMm").asDouble());
+            assertEquals(80, body.get("thresholds").get("dangerCombinedChancePercent").asInt());
         });
     }
 
@@ -97,7 +101,16 @@ class WebServerTest {
         JavalinTest.test(server.app(), (s, client) -> {
             Response response = client.get("/");
             assertEquals(200, response.code());
-            assertTrue(response.body().string().contains("Flood Risk Alerter"));
+            assertTrue(response.body().string().contains("ระบบแจ้งเตือนความเสี่ยงน้ำท่วม"));
+        });
+    }
+
+    @Test
+    void servesAboutPage() {
+        JavalinTest.test(server.app(), (s, client) -> {
+            Response response = client.get("/about.html");
+            assertEquals(200, response.code());
+            assertTrue(response.body().string().contains("ความเป็นมาของโครงงาน"));
         });
     }
 

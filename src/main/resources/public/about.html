@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="th">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ความเป็นมา · ระบบแจ้งเตือนความเสี่ยงน้ำท่วม</title>
+    <meta name="description" content="ทำไมแอปพยากรณ์อากาศทั่วไปยังไม่พอ และระบบนี้ช่วยประเมินความเสี่ยงน้ำท่วมได้อย่างไร">
+    <link rel="preload" href="fonts/NotoSansThai-Bold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="fonts/NotoSansThai-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="about.css">
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" href="/">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.5 12 2.5Z"/></svg>
+        ระบบแจ้งเตือนความเสี่ยงน้ำท่วม
+    </a>
+    <nav aria-label="หน้าหลัก">
+        <a href="/">แดชบอร์ด</a>
+        <a href="/about.html" aria-current="page">ความเป็นมา</a>
+    </nav>
+</header>
+
+<main>
+
+    <!-- ===== Hero ===== -->
+    <section class="hero">
+        <div class="rain" aria-hidden="true"></div>
+        <div class="wrap hero-inner">
+            <p class="eyebrow">ความเป็นมาของโครงงาน</p>
+            <h1 class="hero-title">
+                <span>ฝนตก</span>
+                <span>ไม่ได้แปลว่า<em>น้ำท่วม</em></span>
+            </h1>
+            <p class="hero-lede">แอปพยากรณ์อากาศบอกได้ว่า <strong>“ฝนจะตกไหม”</strong>
+                แต่คำถามที่คนไทยต้องการคำตอบทุกฤดูฝนคือ <strong>“ฝนมากพอจะท่วมไหม”</strong></p>
+            <a class="button" href="/">
+                ลองตรวจความเสี่ยง
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== Floods timeline ===== -->
+    <section class="section wrap reveal">
+        <header class="section-head">
+            <p class="kicker">01 · ปัญหา</p>
+            <h2>ประเทศไทยเจอน้ำท่วมแทบทุกปี</h2>
+            <p>ไม่ใช่แค่น้ำท่วมใหญ่ระดับลุ่มน้ำ ในเมืองยังมีน้ำท่วมขังฉับพลันหลังฝนตกหนักแทบทุกฤดูฝน</p>
+        </header>
+
+        <ol class="timeline">
+            <li class="event">
+                <span class="year">2554</span>
+                <h3>มหาอุทกภัย</h3>
+                <p>ท่วม 65 จังหวัด ความเสียหายราว <strong>1.43 ล้านล้านบาท</strong></p>
+            </li>
+            <li class="event">
+                <span class="year">2560</span>
+                <h3>น้ำท่วมภาคใต้</h3>
+                <p>ฝนตกหนักผิดฤดูต่อเนื่องหลายวันในหลายจังหวัดภาคใต้</p>
+            </li>
+            <li class="event">
+                <span class="year">2567</span>
+                <h3>เชียงราย · แม่สาย</h3>
+                <p>ฝนหนักจากอิทธิพลพายุ ทำให้น้ำท่วมฉับพลันในเขตเมือง</p>
+            </li>
+        </ol>
+    </section>
+
+    <!-- ===== Before / after ===== -->
+    <section class="section band reveal">
+        <div class="wrap">
+            <header class="section-head">
+                <p class="kicker">02 · ช่องว่าง</p>
+                <h2>ตัวเลขเดียวกัน ความหมายต่างกัน</h2>
+                <p>“โอกาสฝน 80%” อาจเป็นฝนปรอยๆ หรือพายุฝนก็ได้ ระบบนี้จึงแปลงพยากรณ์ให้เป็นคำตอบที่ตัดสินใจได้</p>
+            </header>
+
+            <div class="compare">
+                <figure class="phone phone-plain">
+                    <figcaption>แอปพยากรณ์อากาศทั่วไป</figcaption>
+                    <div class="phone-screen">
+                        <p class="phone-city">Bangkok</p>
+                        <svg class="phone-cloud" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 15.5h10a4 4 0 0 0 .4-8A5.5 5.5 0 0 0 6.6 8.6 3.5 3.5 0 0 0 7 15.5Z"/><path d="M8.5 18.5 8 20.5M12.5 18.5l-.5 2M16.5 18.5l-.5 2"/></svg>
+                        <p class="phone-big">80%</p>
+                        <p class="phone-small">โอกาสฝนตก</p>
+                    </div>
+                    <p class="verdict verdict-bad">แล้ว… ต้องเตรียมตัวไหม?</p>
+                </figure>
+
+                <div class="arrow" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M4 12h16M14 6l6 6-6 6"/></svg>
+                </div>
+
+                <figure class="phone phone-ours">
+                    <figcaption>ระบบของเรา</figcaption>
+                    <div class="phone-screen">
+                        <p class="status-pill">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.8 23 21.2H1Z" fill="#fab219"/><path d="M12 9v5.5" stroke="#111313" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.7" r="1.3" fill="#111313"/></svg>
+                            เฝ้าระวัง
+                        </p>
+                        <p class="phone-city">Bangkok</p>
+                        <p class="phone-big">42.0<small>มม.</small></p>
+                        <div class="mini-meter" aria-hidden="true"><span style="width:38%"></span><i style="left:31%"></i><i style="left:80%"></i></div>
+                        <p class="phone-small">ฝน 42.0 มม. ≥ เกณฑ์ฝนหนัก 35 มม.</p>
+                    </div>
+                    <p class="verdict verdict-good">รู้ทันทีว่าเสี่ยงระดับไหน และเพราะอะไร</p>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Four problems → solutions ===== -->
+    <section class="section wrap reveal">
+        <header class="section-head">
+            <p class="kicker">03 · วิธีแก้</p>
+            <h2>4 สิ่งที่แอปทั่วไปทำไม่ได้</h2>
+        </header>
+
+        <div class="grid4">
+            <article class="fix">
+                <span class="num">01</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11Z"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5"/></svg>
+                <h3>บอกแค่โอกาสฝน</h3>
+                <p class="solution">แสดง <strong>ปริมาณฝนเป็นมิลลิเมตร</strong> คู่กับโอกาสฝน</p>
+            </article>
+            <article class="fix">
+                <span class="num">02</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19Z"/><path d="M12 10v4.5M12 17.2v.3"/></svg>
+                <h3>ไม่มีระดับความเสี่ยง</h3>
+                <p class="solution">สรุปเป็น <strong>ปลอดภัย · เฝ้าระวัง · อันตราย</strong> พร้อมเหตุผล</p>
+            </article>
+            <article class="fix">
+                <span class="num">03</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18"/><path d="M4 17c4 0 5-3 8-6s5-5 8-5"/></svg>
+                <h3>ไม่รวมฝนสะสม</h3>
+                <p class="solution">รวม <strong>ฝน 24 ชั่วโมง</strong> และวาดเทียบเส้นอันตราย</p>
+            </article>
+            <article class="fix">
+                <span class="num">04</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+                <h3>ไม่ใช้ข้อมูลของไทย</h3>
+                <p class="solution">ใช้ <strong>ข้อมูลกรมอุตุนิยมวิทยา</strong> ครบ 77 จังหวัด</p>
+            </article>
+        </div>
+    </section>
+
+    <!-- ===== Risk levels ===== -->
+    <section class="section band reveal">
+        <div class="wrap">
+            <header class="section-head">
+                <p class="kicker">04 · เกณฑ์</p>
+                <h2>ฝนเท่าไรถึงเรียกว่าเสี่ยง</h2>
+                <p>อ้างอิงเกณฑ์ปริมาณฝนใน 24 ชั่วโมงของกรมอุตุนิยมวิทยา</p>
+            </header>
+
+            <figure class="scale">
+                <div class="scale-bar" role="img"
+                     aria-label="สเกลฝน 24 ชั่วโมง: เล็กน้อย 0.1 ถึง 10 มม., ปานกลาง 10.1 ถึง 35 มม., หนัก 35.1 ถึง 90 มม., หนักมาก ตั้งแต่ 90.1 มม.">
+                    <span class="seg s1" style="flex:10"></span>
+                    <span class="seg s2" style="flex:25"></span>
+                    <span class="seg s3" style="flex:55"></span>
+                    <span class="seg s4" style="flex:30"></span>
+                </div>
+                <div class="scale-labels" aria-hidden="true">
+                    <span style="flex:10">เล็กน้อย</span>
+                    <span style="flex:25">ปานกลาง</span>
+                    <span style="flex:55">ฝนหนัก</span>
+                    <span style="flex:30">หนักมาก</span>
+                </div>
+                <div class="scale-ticks" aria-hidden="true">
+                    <span style="left:0">0</span>
+                    <span style="left:8.333%">10</span>
+                    <span style="left:29.167%">35</span>
+                    <span style="left:75%">90</span>
+                    <span style="left:100%">มม.</span>
+                </div>
+            </figure>
+
+            <div class="levels">
+                <article class="level level-danger">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.4 1h9.2L23 7.4v9.2L16.6 23H7.4L1 16.6V7.4Z" fill="#d03b3b"/><path d="M12 6.5v7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg>
+                    <h3>อันตราย</h3>
+                    <p class="rule">ฝน ≥ <b>90</b> มม.<br>หรือ ≥ <b>50</b> มม. และโอกาส ≥ <b>80%</b></p>
+                    <p class="meaning">ฝนหนักมาก มีโอกาสน้ำท่วมสูง ควรเตรียมการ</p>
+                </article>
+                <article class="level level-warning">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.8 23 21.2H1Z" fill="#fab219"/><path d="M12 9v5.5" stroke="#111313" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="17.7" r="1.3" fill="#111313"/></svg>
+                    <h3>เฝ้าระวัง</h3>
+                    <p class="rule">ฝน ≥ <b>35</b> มม.<br>หรือ ≥ <b>20</b> มม. และโอกาส ≥ <b>70%</b></p>
+                    <p class="meaning">ฝนหนัก อาจมีน้ำท่วมขัง ควรติดตาม</p>
+                </article>
+                <article class="level level-safe">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#0ca30c"/><path d="m7 12.5 3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <h3>ปลอดภัย</h3>
+                    <p class="rule">ต่ำกว่าเกณฑ์<br>เฝ้าระวังทั้งสองข้อ</p>
+                    <p class="meaning">ฝนไม่ถึงระดับที่ต้องกังวล</p>
+                </article>
+            </div>
+            <p class="footnote">ค่า 35 และ 90 มม. คือเกณฑ์ “ฝนหนัก” และ “ฝนหนักมาก” ของกรมอุตุนิยมวิทยา
+                ส่วนเงื่อนไขที่รวมโอกาสฝนเป็นเกณฑ์ที่ทีมกำหนดเพิ่ม เพื่อเตือนล่วงหน้าเมื่อฝนมีแนวโน้มตกเกือบทั้งวัน</p>
+        </div>
+    </section>
+
+    <!-- ===== Limitations + CTA ===== -->
+    <section class="section wrap reveal">
+        <div class="note">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.8v.2"/></svg>
+            <div>
+                <h3>ข้อจำกัด</h3>
+                <p>ระบบประเมินจาก <strong>พยากรณ์ฝน</strong> เท่านั้น ยังไม่รวมระดับน้ำในแม่น้ำหรือความสามารถของระบบระบายน้ำ
+                    และ<strong>ไม่ใช่ประกาศเตือนภัยทางการ</strong> โปรดติดตามประกาศของหน่วยงานรัฐควบคู่กัน</p>
+            </div>
+        </div>
+
+        <div class="cta">
+            <h2>พร้อมดูความเสี่ยงในจังหวัดของคุณแล้วหรือยัง</h2>
+            <a class="button" href="/">
+                ไปที่แดชบอร์ด
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer wrap">
+    <p>มินิโปรเจกต์ · ปฏิบัติการวิศวกรรมซอฟต์แวร์เชิงวัตถุ</p>
+    <p>ข้อมูลพยากรณ์: กรมอุตุนิยมวิทยา</p>
+</footer>
+
+<script>
+    // Reveal sections as they scroll into view (skipped when motion is reduced).
+    (function () {
+        var sections = document.querySelectorAll(".reveal");
+        if (!("IntersectionObserver" in window)
+                || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            sections.forEach(function (s) { s.classList.add("is-visible"); });
+            return;
+        }
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        sections.forEach(function (s) { observer.observe(s); });
+    })();
+</script>
+</body>
+</html>
